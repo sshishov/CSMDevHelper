@@ -19,7 +19,6 @@ namespace CSMDevHelper
         public frmCSMDH()
         {
             InitializeComponent();
-            treeLogCollection = this.treeLog.Nodes;
             isLogUpdate = false;
         }
 
@@ -28,6 +27,7 @@ namespace CSMDevHelper
             btnLogStart.Enabled = false;
             btnLogRestart.Enabled = true;
             btnLogStop.Enabled = true;
+            btnLogPause.Enabled = true;
             isLogUpdate = true;
 
             ThreadStart sthread = new ThreadStart(ThreadLogUpdate);
@@ -52,13 +52,30 @@ namespace CSMDevHelper
             btnLogStart.Enabled = true;
             btnLogRestart.Enabled = false;
             btnLogStop.Enabled = false;
-            treeLogCollection.Clear();
+            btnLogPause.Enabled = false;
+            btnLogPause.Text = "Pause";
+            treeLog.Nodes.Clear();
+            cblstEvents.Items.Clear();
+        }
+
+        private void btnLogPause_Click(object sender, EventArgs e)
+        {
+            if (btnLogPause.Text == "Pause")
+            {
+                btnLogPause.Text = "Resume";
+                logThread.Suspend();
+            }
+            else
+            {
+                btnLogPause.Text = "Pause";
+                logThread.Resume();
+            }
         }
 
         void ThreadLogUpdate()
         {
             string update = "";
-            LogReader logReader = new LogReader(@"C:\DEV_logs.txt");
+            LogReader logReader = new LogReader(@"C:\DEV_logs1.txt");
             while(isLogUpdate)
             {
                 update = logReader.Process();
@@ -75,13 +92,40 @@ namespace CSMDevHelper
 
         void LogUpdate(string str)
         {
+            TreeNode rootNode = new TreeNode();
+            object eventObject;
+            string eventType;
             if (isLogUpdate)
             {
                 JavaScriptSerializer mySer = new JavaScriptSerializer();
                 try
                 {
                     Dictionary<string, object> dict = mySer.Deserialize<Dictionary<string, object>>(str);
-                    this.treeLogCollection.Add(generate_tree(dict, null));
+                    if (dict.TryGetValue("MitaiEvent", out eventObject))
+                    {
+                        dict = (Dictionary<string, object>)eventObject;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                    if (dict.TryGetValue("Type", out eventObject))
+                    {
+                        eventType = (string)eventObject;
+                        dict.Remove("Type");
+                    }
+                    else
+                    {
+                        eventType = "Unknown event type";
+                    }
+                    if (!cblstEvents.Items.Contains(eventType))
+                    {
+                        cblstEvents.Items.Add(eventType, true);
+                    }
+                    rootNode.Text = eventType;
+                    rootNode.Nodes.Add(generate_tree(dict));
+                    treeLog.Nodes.Add(rootNode);
+                    treeLogCollection.Add(rootNode);
                 }
                 catch (Exception e)
                 {
@@ -90,32 +134,24 @@ namespace CSMDevHelper
             }
         }
 
-        TreeNode generate_tree(Dictionary<string, object> dict, TreeNode parent)
+        TreeNode generate_tree(Dictionary<string, object> dict)
         {
             TreeNode currentNode = new TreeNode();
             string strNode = "";
 
             foreach(string dictKey in dict.Keys){
                 object dictValue = dict[dictKey];
-                if (parent == null)
-                {
-                    Dictionary<string, object> eee;
-                    parent = currentNode;
-                    object eventType;
-                    if (((Dictionary<string, object>)dictValue).TryGetValue("Type", out eventType))
-                        parent.Text = (string)eventType;
-                }
                 if ((object)dictValue is Dictionary<string, object>)
                 {
                     strNode = dictKey;
-                    parent.Nodes.Add(generate_tree((Dictionary<string, object>)dictValue, currentNode));
+                    currentNode.Nodes.Add(generate_tree((Dictionary<string, object>)dictValue));
                 }
                 else if ((Object)dictValue is ArrayList)
                 {
                     strNode = dictKey;
                     foreach(Dictionary<string, object> node in (ArrayList)dictValue)
                     {
-                        parent.Nodes.Add(generate_tree((Dictionary<string, object>)node, currentNode));
+                        currentNode.Nodes.Add(generate_tree((Dictionary<string, object>)node));
                     }
                 }
                 else
@@ -124,10 +160,23 @@ namespace CSMDevHelper
                     return new TreeNode(strNode);
                 }
             }
-            Console.WriteLine("Adding " + strNode);
-            if (currentNode.Text == "")
-                currentNode.Text = strNode;
+            currentNode.Text = strNode;
             return currentNode;
         }
+
+        private void cblstEvents_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DrawTreeLog();
+        }
+
+        void DrawTreeLog()
+        {
+            foreach (TreeNode node in treeLogCollection)
+            {
+                if (cblstEvents.CheckedItems.Contains(node.Text))
+                    treeLog.Nodes.Add(node);
+            }
+        }
+
     }
 }

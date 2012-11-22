@@ -11,13 +11,15 @@ namespace CSMDevHelper
     {
         private FileStream m_fileStream;
         private StreamReader m_streamReader;
+//        private static string logPattern = @"
+//            (?ix)
+//            (?<DATE>\d{2}/\d{2}/\d{4})\s+
+//            (?<TIME>\d{1,2}:\d{1,2}:\d{1,2}\s(PM|AM))\s+
+//            (?<UNK1>\d+)\s+
+//            (?<UNK2>\w+)\s+
+//            :\s+Lay7Dec\|
+//            (?<MESSAGE>.*)";
         private static string logPattern = @"
-            (?ix)
-            (?<DATE>\\d{2}/\\d{2}/\\d{4})\\s+
-            (?<TIME>\\d{1,2}:\\d{1,2}:\\d{1,2}\\s(PM|AM))\\s+
-            (?<UNK1>\\d+)\\s+
-            (?<UNK2>\\w+)\\s+
-            :\\s+Lay7Dec\\|
             (?<MESSAGE>.*)";
 
         public LogReader(string filename)
@@ -34,7 +36,7 @@ namespace CSMDevHelper
             result = m_streamReader.ReadLine();
             if (result != null)
             {
-                Match logMatch = Regex.Match(result, logPattern);
+                Match logMatch = Regex.Match(result, logPattern, RegexOptions.IgnorePatternWhitespace);
                 if (logMatch.Success)
                 {
                     result = logMatch.Groups["MESSAGE"].Value;

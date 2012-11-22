@@ -32,6 +32,8 @@
             this.tcCSMDH = new System.Windows.Forms.TabControl();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
             this.tbLogPage = new System.Windows.Forms.TabPage();
+            this.btnLogPause = new System.Windows.Forms.Button();
+            this.cblstEvents = new System.Windows.Forms.CheckedListBox();
             this.treeLog = new System.Windows.Forms.TreeView();
             this.btnLogStop = new System.Windows.Forms.Button();
             this.btnLogStart = new System.Windows.Forms.Button();
@@ -47,7 +49,7 @@
             this.tcCSMDH.Location = new System.Drawing.Point(13, 13);
             this.tcCSMDH.Name = "tcCSMDH";
             this.tcCSMDH.SelectedIndex = 0;
-            this.tcCSMDH.Size = new System.Drawing.Size(535, 322);
+            this.tcCSMDH.Size = new System.Drawing.Size(824, 502);
             this.tcCSMDH.TabIndex = 0;
             // 
             // tbGeneralPage
@@ -55,13 +57,15 @@
             this.tbGeneralPage.Location = new System.Drawing.Point(4, 22);
             this.tbGeneralPage.Name = "tbGeneralPage";
             this.tbGeneralPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbGeneralPage.Size = new System.Drawing.Size(527, 296);
+            this.tbGeneralPage.Size = new System.Drawing.Size(816, 476);
             this.tbGeneralPage.TabIndex = 0;
             this.tbGeneralPage.Text = "General";
             this.tbGeneralPage.UseVisualStyleBackColor = true;
             // 
             // tbLogPage
             // 
+            this.tbLogPage.Controls.Add(this.btnLogPause);
+            this.tbLogPage.Controls.Add(this.cblstEvents);
             this.tbLogPage.Controls.Add(this.treeLog);
             this.tbLogPage.Controls.Add(this.btnLogStop);
             this.tbLogPage.Controls.Add(this.btnLogStart);
@@ -69,23 +73,45 @@
             this.tbLogPage.Location = new System.Drawing.Point(4, 22);
             this.tbLogPage.Name = "tbLogPage";
             this.tbLogPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbLogPage.Size = new System.Drawing.Size(527, 296);
+            this.tbLogPage.Size = new System.Drawing.Size(816, 476);
             this.tbLogPage.TabIndex = 1;
             this.tbLogPage.Text = "Logging";
             this.tbLogPage.UseVisualStyleBackColor = true;
+            // 
+            // btnLogPause
+            // 
+            this.btnLogPause.Enabled = false;
+            this.btnLogPause.Location = new System.Drawing.Point(745, 6);
+            this.btnLogPause.Name = "btnLogPause";
+            this.btnLogPause.Size = new System.Drawing.Size(65, 22);
+            this.btnLogPause.TabIndex = 6;
+            this.btnLogPause.Text = "Pause";
+            this.btnLogPause.UseVisualStyleBackColor = true;
+            this.btnLogPause.Click += new System.EventHandler(this.btnLogPause_Click);
+            // 
+            // cblstEvents
+            // 
+            this.cblstEvents.CheckOnClick = true;
+            this.cblstEvents.FormattingEnabled = true;
+            this.cblstEvents.Location = new System.Drawing.Point(532, 34);
+            this.cblstEvents.Name = "cblstEvents";
+            this.cblstEvents.Size = new System.Drawing.Size(278, 439);
+            this.cblstEvents.TabIndex = 5;
+            this.cblstEvents.SelectedIndexChanged += new System.EventHandler(this.cblstEvents_SelectedIndexChanged);
             // 
             // treeLog
             // 
             this.treeLog.Location = new System.Drawing.Point(7, 6);
             this.treeLog.Name = "treeLog";
-            this.treeLog.Size = new System.Drawing.Size(424, 284);
+            this.treeLog.Size = new System.Drawing.Size(519, 467);
             this.treeLog.TabIndex = 4;
             // 
             // btnLogStop
             // 
-            this.btnLogStop.Location = new System.Drawing.Point(437, 62);
+            this.btnLogStop.Enabled = false;
+            this.btnLogStop.Location = new System.Drawing.Point(674, 6);
             this.btnLogStop.Name = "btnLogStop";
-            this.btnLogStop.Size = new System.Drawing.Size(84, 22);
+            this.btnLogStop.Size = new System.Drawing.Size(65, 22);
             this.btnLogStop.TabIndex = 3;
             this.btnLogStop.Text = "Stop";
             this.btnLogStop.UseVisualStyleBackColor = true;
@@ -93,9 +119,9 @@
             // 
             // btnLogStart
             // 
-            this.btnLogStart.Location = new System.Drawing.Point(437, 6);
+            this.btnLogStart.Location = new System.Drawing.Point(532, 6);
             this.btnLogStart.Name = "btnLogStart";
-            this.btnLogStart.Size = new System.Drawing.Size(84, 22);
+            this.btnLogStart.Size = new System.Drawing.Size(65, 22);
             this.btnLogStart.TabIndex = 1;
             this.btnLogStart.Text = "Start";
             this.btnLogStart.UseVisualStyleBackColor = true;
@@ -103,9 +129,10 @@
             // 
             // btnLogRestart
             // 
-            this.btnLogRestart.Location = new System.Drawing.Point(437, 34);
+            this.btnLogRestart.Enabled = false;
+            this.btnLogRestart.Location = new System.Drawing.Point(603, 6);
             this.btnLogRestart.Name = "btnLogRestart";
-            this.btnLogRestart.Size = new System.Drawing.Size(84, 22);
+            this.btnLogRestart.Size = new System.Drawing.Size(65, 22);
             this.btnLogRestart.TabIndex = 2;
             this.btnLogRestart.Text = "Restart";
             this.btnLogRestart.UseVisualStyleBackColor = true;
@@ -115,7 +142,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(560, 347);
+            this.ClientSize = new System.Drawing.Size(878, 527);
             this.Controls.Add(this.tcCSMDH);
             this.Name = "frmCSMDH";
             this.Text = "CSM Development Helper";
@@ -138,6 +165,8 @@
         private System.Windows.Forms.TreeNodeCollection treeLogCollection;
         private bool isLogUpdate;
         private System.Threading.Thread logThread;
+        private System.Windows.Forms.CheckedListBox cblstEvents;
+        private System.Windows.Forms.Button btnLogPause;
     }
 }
 
