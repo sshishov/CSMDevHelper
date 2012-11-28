@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EventNode.cs" />
     <Compile Include="LogReader.cs" />
     <Compile Include="frmCSMDH.cs">
       <SubType>Form</SubType>

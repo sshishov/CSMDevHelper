@@ -162,7 +162,6 @@
         private System.Windows.Forms.Button btnLogStop;
         private System.Windows.Forms.TreeView treeLog;
 
-        private System.Windows.Forms.TreeNodeCollection treeLogCollection;
         private bool isLogUpdate;
         private System.Threading.Thread logThread;
         private System.Windows.Forms.CheckedListBox cblstEvents;
