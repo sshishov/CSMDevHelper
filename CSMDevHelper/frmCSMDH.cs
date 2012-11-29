@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace CSMDevHelper
 {
-    delegate void LogUpdateDelegate(string str);
+    delegate void LogUpdateDelegate(LogResult logResult);
 
     public partial class frmCSMDH : Form
     {
@@ -46,7 +46,8 @@ namespace CSMDevHelper
 
         private void btnLogStop_Click(object sender, EventArgs e)
         {
-            isLogUpdate = false;
+            this.isLogUpdate = false;
+            this.logThread.Join();
             btnLogStart.Enabled = true;
             btnLogRestart.Enabled = false;
             btnLogStop.Enabled = false;
@@ -74,35 +75,49 @@ namespace CSMDevHelper
 
         void ThreadLogUpdate()
         {
-            string update = "";
-            //LogReader logReader = new LogReader(@"C:\DEV_logs1.txt");
-            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log");
-            while(isLogUpdate)
+            LogResult update;
+            LogReader logReader = new LogReader(@"C:\GA_logs.txt", true);
+            //LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", true);
+            while(this.isLogUpdate)
             {
                 update = logReader.Process();
-                if (update != null && update != "")
-                {
-                    Invoke(this.myDelegate, update);
-                }
-                else if (update == "")
-                {
-
-                }
+                Invoke(this.myDelegate, update);
             }
+            MessageBox.Show("EAH!");
         }
 
-        void LogUpdate(string jsonString)
+        void LogUpdate(LogResult logResult)
         {
-            if (isLogUpdate)
+            if (this.isLogUpdate)
             {
-                EventNode rootNode = new EventNode(jsonString);
-                if (rootNode.eventInfo.eventType != null)
+                switch (logResult.code)
                 {
-                    if (!cblstEvents.Items.Contains(rootNode.eventInfo.eventType))
-                    {
-                        cblstEvents.Items.Add(rootNode.eventInfo.eventType, true);
-                    }
-                    treeLog.Nodes.Add(rootNode);
+                    case LogCode.LOG_MITAI:
+                        EventNode rootNode = new EventNode(logResult.result);
+                        if (!cblstEvents.Items.Contains(rootNode.eventInfo.eventType))
+                        {
+                            cblstEvents.Items.Add(rootNode.eventInfo.eventType, true);
+                        }
+                        treeLog.Nodes.Add(rootNode);
+                        break;
+                    case LogCode.LOG_MODELING:
+                        EventNode lastNode = (EventNode)treeLog.Nodes[treeLog.GetNodeCount(false) - 1];
+                        if (lastNode.ToolTipText == String.Empty)
+                        {
+                            lastNode.ToolTipText += logResult.result;
+                        }
+                        else
+                        {
+                            lastNode.ToolTipText += "\n" + logResult.result;
+                        }
+                        lastNode.NodeFont = new Font(treeLog.Font, FontStyle.Bold);
+                        lastNode.Text += String.Empty;
+                        break;
+                    case LogCode.LOG_LEG:
+                        break;
+                    case LogCode.LOG_NOTHING:
+                    default:
+                        break;
                 }
             }
         }

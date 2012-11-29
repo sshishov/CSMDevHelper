@@ -101,8 +101,11 @@
             // 
             // treeLog
             // 
+            this.treeLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.treeLog.Location = new System.Drawing.Point(7, 6);
             this.treeLog.Name = "treeLog";
+            this.treeLog.ShowNodeToolTips = true;
+            this.treeLog.ShowRootLines = false;
             this.treeLog.Size = new System.Drawing.Size(519, 467);
             this.treeLog.TabIndex = 4;
             // 
