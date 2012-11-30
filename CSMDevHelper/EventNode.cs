@@ -46,6 +46,7 @@ namespace CSMDevHelper
                     jsonString = jsonString.Replace("{*** Processing Parked Event ***}", "");
                     this.eventInfo.ParkedEvent = true;
                 }
+                Regex.Replace(jsonString, @"\s\w+\s", @"ERROR");
                 JavaScriptSerializer mySer = new JavaScriptSerializer();
                 this.jsonDict = mySer.Deserialize<Dictionary<string, object>>(jsonString);
             }

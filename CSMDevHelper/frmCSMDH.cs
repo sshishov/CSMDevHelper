@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using System.Web.Script.Serialization;
 
 namespace CSMDevHelper
 {
@@ -76,8 +77,8 @@ namespace CSMDevHelper
         void ThreadLogUpdate()
         {
             LogResult update;
-            LogReader logReader = new LogReader(@"C:\GA_logs.txt", true);
-            //LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", true);
+            //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
+            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
             while(this.isLogUpdate)
             {
                 update = logReader.Process();
