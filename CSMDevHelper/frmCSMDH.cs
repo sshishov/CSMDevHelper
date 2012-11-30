@@ -18,7 +18,8 @@ namespace CSMDevHelper
         public frmCSMDH()
         {
             InitializeComponent();
-            isLogUpdate = false;
+            this.isLogUpdate = false;
+            this.rootNode = null;
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
@@ -78,13 +79,13 @@ namespace CSMDevHelper
         {
             LogResult update;
             //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
-            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            //LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
             while(this.isLogUpdate)
             {
                 update = logReader.Process();
                 Invoke(this.myDelegate, update);
             }
-            MessageBox.Show("EAH!");
         }
 
         void LogUpdate(LogResult logResult)
@@ -94,25 +95,46 @@ namespace CSMDevHelper
                 switch (logResult.code)
                 {
                     case LogCode.LOG_MITAI:
-                        EventNode rootNode = new EventNode(logResult.result);
-                        if (!cblstEvents.Items.Contains(rootNode.eventInfo.eventType))
+                        if (this.rootNode != null && this.rootNode.Name != "MonitorSetEvent")
                         {
-                            cblstEvents.Items.Add(rootNode.eventInfo.eventType, true);
+                            // Updating Event checklist
+                            if (!cblstEvents.Items.Contains(this.rootNode.eventInfo.eventType))
+                            {
+                                cblstEvents.Items.Add(this.rootNode.eventInfo.eventType, true);
+                            }
+                            if (!cblstMonitors.Items.Contains(this.rootNode.Monitor))
+                            {
+                                if (this.rootNode.eventInfo.eventMonitorHandlerExtension == "UnknownExtension")
+                                {
+                                    cblstMonitors.Items.Add(this.rootNode.Monitor, true);
+                                }
+                                else
+                                {
+                                    cblstMonitors.Items.Add(this.rootNode.Monitor, true);
+                                }
+                            }
+                            // Updating Monitor checklist
+                            this.rootNode.Text = treeLog.Nodes.Count + "> " + this.rootNode.Text;
+                            treeLog.Nodes.Add(this.rootNode);
                         }
-                        treeLog.Nodes.Add(rootNode);
+                        this.rootNode = new EventNode(logResult.result);
                         break;
                     case LogCode.LOG_MODELING:
-                        EventNode lastNode = (EventNode)treeLog.Nodes[treeLog.GetNodeCount(false) - 1];
-                        if (lastNode.ToolTipText == String.Empty)
+                        this.rootNode.hasModeling = true;
+                        if (this.rootNode.ToolTipText == String.Empty)
                         {
-                            lastNode.ToolTipText += logResult.result;
+                            this.rootNode.eventInfo.eventModeling += logResult.result;
+                            this.rootNode.ToolTipText += logResult.result;
                         }
                         else
                         {
-                            lastNode.ToolTipText += "\n" + logResult.result;
+                            this.rootNode.eventInfo.eventModeling += Environment.NewLine + logResult.result;
+                            this.rootNode.ToolTipText += Environment.NewLine + logResult.result;
                         }
-                        lastNode.NodeFont = new Font(treeLog.Font, FontStyle.Bold);
-                        lastNode.Text += String.Empty;
+                        if (!this.rootNode.Text.StartsWith("***"))
+                        {
+                            this.rootNode.Text = "*** " + this.rootNode.Text;
+                        }
                         break;
                     case LogCode.LOG_LEG:
                         break;
@@ -125,19 +147,16 @@ namespace CSMDevHelper
 
         private void cblstEvents_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string selectedEvent = cblstEvents.SelectedItem.ToString();
-            if (!cblstEvents.GetItemChecked(cblstEvents.SelectedIndex))
+            if (cblstEvents.SelectedItem != null)
             {
-                foreach (EventNode node in treeLog.Nodes.Find(selectedEvent, false))
+                if (!cblstEvents.GetItemChecked(cblstEvents.SelectedIndex))
                 {
-                    node.Hide();
-                }
-            }
-            else
-            {
-                foreach (EventNode node in treeLog.Nodes.Find(selectedEvent, false))
-                {
-                    node.Show();
+                    cblstEvents.Items.Remove(cblstEvents.SelectedItem);
+                    foreach (EventNode node in treeLog.Nodes.Find(cblstEvents.SelectedItem.ToString(), false))
+                    {
+                        treeLog.Nodes.Remove(node);
+                    //    node.Hide();
+                    }
                 }
             }
         }

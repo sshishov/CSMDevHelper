@@ -35,7 +35,7 @@ namespace CSMDevHelper
         private static string logHeaderPattern = @"
             (?ix)
             (?<DATE>\d{2}/\d{2}/\d{4})\s+
-            (?<TIME>\d{1,2}:\d{1,2}:\d{1,2}\s(PM|AM))\s+
+            (?<TIME>\d{1,2}:\d{1,2}:\d{1,2}\s(PM|AM|))\s*
             (?<UNK1>\d+)\s+
             (?<UNK2>\w+)\s+:s*
             (?<MESSAGE>.*)";
@@ -68,7 +68,7 @@ namespace CSMDevHelper
             result = this.m_streamReader.ReadLine();
             if (result != null && result != String.Empty)
             {
-                Console.WriteLine(result);
+                // Console.WriteLine(result);
                 logMatch = Regex.Match(result, LogReader.logHeaderPattern, RegexOptions.IgnorePatternWhitespace);
                 if (logMatch.Success)
                 {

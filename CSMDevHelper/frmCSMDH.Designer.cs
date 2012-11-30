@@ -38,8 +38,16 @@
             this.btnLogStop = new System.Windows.Forms.Button();
             this.btnLogStart = new System.Windows.Forms.Button();
             this.btnLogRestart = new System.Windows.Forms.Button();
+            this.tcLogFilters = new System.Windows.Forms.TabControl();
+            this.tbEventFilterPage = new System.Windows.Forms.TabPage();
+            this.tbMonitorFilterPage = new System.Windows.Forms.TabPage();
+            this.cblstMonitors = new System.Windows.Forms.CheckedListBox();
+            this.tbGCIDPage = new System.Windows.Forms.TabPage();
             this.tcCSMDH.SuspendLayout();
             this.tbLogPage.SuspendLayout();
+            this.tcLogFilters.SuspendLayout();
+            this.tbEventFilterPage.SuspendLayout();
+            this.tbMonitorFilterPage.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcCSMDH
@@ -64,8 +72,8 @@
             // 
             // tbLogPage
             // 
+            this.tbLogPage.Controls.Add(this.tcLogFilters);
             this.tbLogPage.Controls.Add(this.btnLogPause);
-            this.tbLogPage.Controls.Add(this.cblstEvents);
             this.tbLogPage.Controls.Add(this.treeLog);
             this.tbLogPage.Controls.Add(this.btnLogStop);
             this.tbLogPage.Controls.Add(this.btnLogStart);
@@ -93,20 +101,20 @@
             // 
             this.cblstEvents.CheckOnClick = true;
             this.cblstEvents.FormattingEnabled = true;
-            this.cblstEvents.Location = new System.Drawing.Point(532, 34);
+            this.cblstEvents.Location = new System.Drawing.Point(6, 6);
             this.cblstEvents.Name = "cblstEvents";
-            this.cblstEvents.Size = new System.Drawing.Size(278, 439);
+            this.cblstEvents.Size = new System.Drawing.Size(254, 394);
+            this.cblstEvents.Sorted = true;
             this.cblstEvents.TabIndex = 5;
             this.cblstEvents.SelectedIndexChanged += new System.EventHandler(this.cblstEvents_SelectedIndexChanged);
             // 
             // treeLog
             // 
-            this.treeLog.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.treeLog.Location = new System.Drawing.Point(7, 6);
             this.treeLog.Name = "treeLog";
             this.treeLog.ShowNodeToolTips = true;
             this.treeLog.ShowRootLines = false;
-            this.treeLog.Size = new System.Drawing.Size(519, 467);
+            this.treeLog.Size = new System.Drawing.Size(523, 464);
             this.treeLog.TabIndex = 4;
             // 
             // btnLogStop
@@ -141,6 +149,58 @@
             this.btnLogRestart.UseVisualStyleBackColor = true;
             this.btnLogRestart.Click += new System.EventHandler(this.btnLogRestart_Click);
             // 
+            // tcLogFilters
+            // 
+            this.tcLogFilters.Controls.Add(this.tbEventFilterPage);
+            this.tcLogFilters.Controls.Add(this.tbMonitorFilterPage);
+            this.tcLogFilters.Controls.Add(this.tbGCIDPage);
+            this.tcLogFilters.Location = new System.Drawing.Point(536, 35);
+            this.tcLogFilters.Name = "tcLogFilters";
+            this.tcLogFilters.SelectedIndex = 0;
+            this.tcLogFilters.Size = new System.Drawing.Size(274, 435);
+            this.tcLogFilters.TabIndex = 7;
+            // 
+            // tbEventFilterPage
+            // 
+            this.tbEventFilterPage.Controls.Add(this.cblstEvents);
+            this.tbEventFilterPage.Location = new System.Drawing.Point(4, 22);
+            this.tbEventFilterPage.Name = "tbEventFilterPage";
+            this.tbEventFilterPage.Padding = new System.Windows.Forms.Padding(3);
+            this.tbEventFilterPage.Size = new System.Drawing.Size(266, 409);
+            this.tbEventFilterPage.TabIndex = 0;
+            this.tbEventFilterPage.Text = "Events";
+            this.tbEventFilterPage.UseVisualStyleBackColor = true;
+            // 
+            // tbMonitorFilterPage
+            // 
+            this.tbMonitorFilterPage.Controls.Add(this.cblstMonitors);
+            this.tbMonitorFilterPage.Location = new System.Drawing.Point(4, 22);
+            this.tbMonitorFilterPage.Name = "tbMonitorFilterPage";
+            this.tbMonitorFilterPage.Padding = new System.Windows.Forms.Padding(3);
+            this.tbMonitorFilterPage.Size = new System.Drawing.Size(266, 409);
+            this.tbMonitorFilterPage.TabIndex = 1;
+            this.tbMonitorFilterPage.Text = "Monitors";
+            this.tbMonitorFilterPage.UseVisualStyleBackColor = true;
+            // 
+            // cblstMonitors
+            // 
+            this.cblstMonitors.CheckOnClick = true;
+            this.cblstMonitors.FormattingEnabled = true;
+            this.cblstMonitors.Location = new System.Drawing.Point(6, 7);
+            this.cblstMonitors.Name = "cblstMonitors";
+            this.cblstMonitors.Size = new System.Drawing.Size(254, 394);
+            this.cblstMonitors.Sorted = true;
+            this.cblstMonitors.TabIndex = 6;
+            // 
+            // tbGCIDPage
+            // 
+            this.tbGCIDPage.Location = new System.Drawing.Point(4, 22);
+            this.tbGCIDPage.Name = "tbGCIDPage";
+            this.tbGCIDPage.Size = new System.Drawing.Size(266, 409);
+            this.tbGCIDPage.TabIndex = 2;
+            this.tbGCIDPage.Text = "GCID";
+            this.tbGCIDPage.UseVisualStyleBackColor = true;
+            // 
             // frmCSMDH
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -151,6 +211,9 @@
             this.Text = "CSM Development Helper";
             this.tcCSMDH.ResumeLayout(false);
             this.tbLogPage.ResumeLayout(false);
+            this.tcLogFilters.ResumeLayout(false);
+            this.tbEventFilterPage.ResumeLayout(false);
+            this.tbMonitorFilterPage.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -166,9 +229,15 @@
         private System.Windows.Forms.TreeView treeLog;
 
         private bool isLogUpdate;
+        private EventNode rootNode;
         private System.Threading.Thread logThread;
         private System.Windows.Forms.CheckedListBox cblstEvents;
         private System.Windows.Forms.Button btnLogPause;
+        private System.Windows.Forms.TabControl tcLogFilters;
+        private System.Windows.Forms.TabPage tbEventFilterPage;
+        private System.Windows.Forms.TabPage tbMonitorFilterPage;
+        private System.Windows.Forms.CheckedListBox cblstMonitors;
+        private System.Windows.Forms.TabPage tbGCIDPage;
     }
 }
 

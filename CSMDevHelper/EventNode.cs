@@ -15,15 +15,42 @@ namespace CSMDevHelper
         public string eventType;
         public string eventTypeNumber;
         public string eventCause;
-        public string EventCauseNumber;
-        public string MonitorHandler;
-        public string MonitorHandlerExtension;
-        public bool ParkedEvent;
+        public string eventCauseNumber;
+        public string eventMonitorHandler;
+        public string eventMonitorHandlerNode;
+        public string eventMonitorHandlerExtension;
+        public string eventModeling;
+
+        public EventInfo()
+        {
+            eventType = String.Empty;
+            eventTypeNumber = String.Empty;
+            eventCause = String.Empty;
+            eventCauseNumber = String.Empty;
+            eventMonitorHandler = String.Empty;
+            eventMonitorHandlerNode = String.Empty;
+            eventMonitorHandlerExtension = String.Empty;
+            eventModeling = String.Empty;
+        }
     }
 
     class EventNode : TreeNode
     {
         public EventInfo eventInfo;
+        public bool hasModeling;
+        public bool isParked;
+
+        public string Monitor
+        {
+            get
+            {
+                if (this.eventInfo.eventMonitorHandlerNode == String.Empty)
+                    return this.eventInfo.eventMonitorHandlerExtension;
+                else
+                    return this.eventInfo.eventMonitorHandlerExtension + " (node" + this.eventInfo.eventMonitorHandlerNode + ")";
+            }
+        }
+
         private Dictionary<string, object> jsonDict;
 
         static Dictionary<string, Color> colorDict = new Dictionary<string, Color>()
@@ -36,17 +63,23 @@ namespace CSMDevHelper
 
         public EventNode(string jsonString)
         {
+            this.isParked = false;
+            this.hasModeling = false;
             eventInfo = new EventInfo();
             Match regMatch;
             try
             {
-                // Workaroud for parked events
+                // Workaround for parked events
                 if (jsonString.Contains("{*** Processing Parked Event ***}"))
                 {
                     jsonString = jsonString.Replace("{*** Processing Parked Event ***}", "");
-                    this.eventInfo.ParkedEvent = true;
+                    this.isParked = true;
                 }
-                Regex.Replace(jsonString, @"\s\w+\s", @"ERROR");
+                // Workaround for old versions (DropEvent w/o comma)
+                jsonString = jsonString.Replace(@"false""", @"false,""");
+                //Workaround for hex integers
+                //jsonString = new Regex(@"(?=\s\w+,)").Replace(jsonString, "$2");
+                //Console.WriteLine("JSON = ***" + jsonString + "***");
                 JavaScriptSerializer mySer = new JavaScriptSerializer();
                 this.jsonDict = mySer.Deserialize<Dictionary<string, object>>(jsonString);
             }
@@ -57,26 +90,69 @@ namespace CSMDevHelper
             }
 
 
+            this.jsonDict = (Dictionary<string, object>)jsonDict["MitaiEvent"];
             object outObject;
-            if (this.jsonDict.TryGetValue("MitaiEvent", out outObject))
+            if (this.jsonDict.TryGetValue("Type", out outObject))
             {
-                this.jsonDict = (Dictionary<string, object>)outObject;
+                regMatch = Regex.Match((string)this.jsonDict["Type"], @"^(?<TYPE>\D+)\((?<TYPENUM>\d+)\)");
+                if (regMatch.Success)
+                {
+                    this.eventInfo.eventType = regMatch.Groups["TYPE"].Value;
+                    this.eventInfo.eventTypeNumber = regMatch.Groups["TYPENUM"].Value;
+                }
+                else
+                {
+                    this.eventInfo.eventType = "UnknownType";
+                    this.eventInfo.eventTypeNumber = "N/A";
+                }
             }
             else
             {
-                return;
+                this.eventInfo.eventType = "UnknownType";
+                this.eventInfo.eventTypeNumber = "N/A";
             }
-            regMatch = Regex.Match((string)this.jsonDict["Type"], @"^(?<TYPE>\D+)\((?<TYPENUM>\d+)\)");
-            if (regMatch.Success)
+            if (this.jsonDict.TryGetValue("Cause", out outObject))
             {
-                this.eventInfo.eventType = regMatch.Groups["TYPE"].Value;
-                this.eventInfo.eventTypeNumber = regMatch.Groups["TYPENUM"].Value;
+                regMatch = Regex.Match((string)outObject, @"^(?<CAUSE>\D+)\((?<CAUSENUM>\d+)\)");
+                if (regMatch.Success)
+                {
+                    this.eventInfo.eventCause = regMatch.Groups["CAUSE"].Value;
+                    this.eventInfo.eventCauseNumber = regMatch.Groups["CAUSENUM"].Value;
+                }
+                else
+                {
+                    this.eventInfo.eventCause = "UnknownCause";
+                    this.eventInfo.eventCauseNumber = "N/A";
+                }
             }
-            regMatch = Regex.Match((string)this.jsonDict["Cause"], @"^(?<CAUSE>\D+)\((?<CAUSENUM>\d+)\)");
-            if (regMatch.Success)
+            else
             {
-                this.eventInfo.eventCause = regMatch.Groups["CAUSE"].Value;
-                this.eventInfo.EventCauseNumber = regMatch.Groups["CAUSENUM"].Value;
+                this.eventInfo.eventCause = "UnknownCause";
+                this.eventInfo.eventCauseNumber = "N/A";
+            }
+
+            if (this.jsonDict.TryGetValue("MonitorHandle", out outObject))
+            {
+                regMatch = Regex.Match((string)outObject, @"^(?<MONITOR>.+)\((?<MONITORNUM>.*)\)");
+                if (regMatch.Success)
+                {
+                    this.eventInfo.eventMonitorHandler = regMatch.Groups["MONITOR"].Value;
+                    this.eventInfo.eventMonitorHandlerExtension = regMatch.Groups["MONITORNUM"].Value;
+                    regMatch = Regex.Match(regMatch.Groups["MONITORNUM"].Value, @"(?<MONITORNODE>.*)\|(?<MONITORNUM>.*)");
+                    if (regMatch.Success)
+                    {
+                        this.eventInfo.eventMonitorHandlerNode = regMatch.Groups["MONITORNODE"].Value;
+                        this.eventInfo.eventMonitorHandlerExtension = regMatch.Groups["MONITORNUM"].Value;
+                    }
+                }
+                else
+                {
+                    this.eventInfo.eventMonitorHandlerExtension = "UnknownExtension";
+                }
+            }
+            else
+            {
+                this.eventInfo.eventMonitorHandlerExtension = "UnknownExtension";
             }
 
             this.Name = this.eventInfo.eventType;
@@ -97,7 +173,7 @@ namespace CSMDevHelper
         {
             this.Nodes.AddRange(GenerateTree(this.jsonDict));
             this.Text = this.eventInfo.eventType + ": " + this.eventInfo.eventCause;
-            if (this.eventInfo.ParkedEvent)
+            if (this.isParked)
             {
                 this.Text = "PARKED: " + this.Text;
             }
