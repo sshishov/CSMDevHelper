@@ -24,8 +24,11 @@ namespace CSMDevHelper
 
         private void btnLogStart_Click(object sender, EventArgs e)
         {
+            treeLog.Nodes.Clear();
+            cblstEvents.Items.Clear();
+            cblstMonitors.Items.Clear();
+
             btnLogStart.Enabled = false;
-            btnLogRestart.Enabled = true;
             btnLogStop.Enabled = true;
             btnLogPause.Enabled = true;
             isLogUpdate = true;
@@ -40,23 +43,14 @@ namespace CSMDevHelper
             while (!logThread.IsAlive) ;
         }
 
-        private void btnLogRestart_Click(object sender, EventArgs e)
-        {
-            btnLogStop_Click(sender, e);
-            btnLogStart_Click(sender, e);
-        }
-
         private void btnLogStop_Click(object sender, EventArgs e)
         {
             this.isLogUpdate = false;
-            this.logThread.Join();
+            //this.logThread.Join();
             btnLogStart.Enabled = true;
-            btnLogRestart.Enabled = false;
             btnLogStop.Enabled = false;
             btnLogPause.Enabled = false;
             btnLogPause.Text = "Pause";
-            treeLog.Nodes.Clear();
-            cblstEvents.Items.Clear();
         }
 
         private void btnLogPause_Click(object sender, EventArgs e)
@@ -147,16 +141,15 @@ namespace CSMDevHelper
 
         private void cblstEvents_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cblstEvents.SelectedItem != null)
+            if (cblstEvents.SelectedItem != null && cblstEvents.SelectedItem != String.Empty)
             {
                 if (!cblstEvents.GetItemChecked(cblstEvents.SelectedIndex))
                 {
-                    cblstEvents.Items.Remove(cblstEvents.SelectedItem);
                     foreach (EventNode node in treeLog.Nodes.Find(cblstEvents.SelectedItem.ToString(), false))
                     {
                         treeLog.Nodes.Remove(node);
-                    //    node.Hide();
                     }
+                    cblstEvents.Items.Remove(cblstEvents.SelectedItem);
                 }
             }
         }
