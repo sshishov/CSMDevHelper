@@ -20,11 +20,13 @@ namespace CSMDevHelper
     {
         public int code;
         public string result;
+        public string timestamp;
 
-        public LogResult(int code, string result)
+        public LogResult(int code, string result, string timestamp)
         {
             this.code = code;
             this.result = result;
+            this.timestamp = timestamp;
         }
     }
 
@@ -34,7 +36,7 @@ namespace CSMDevHelper
         private StreamReader m_streamReader;
         private static string logHeaderPattern = @"
             (?ix)
-            (?<DATE>\d{2}/\d{2}/\d{4})\s+
+            (?<DATE>\d{1,2}/\d{1,2}/\d{1,4})\s+
             (?<TIME>\d{1,2}:\d{1,2}:\d{1,2}\s(PM|AM|))\s*
             (?<UNK1>\d+)\s+
             (?<UNK2>\w+)\s+:s*
@@ -63,6 +65,7 @@ namespace CSMDevHelper
         public LogResult Process()
         {
             string result = String.Empty;
+            string timestamp = String.Empty;
             int code = -1;
             Match logMatch;
             result = this.m_streamReader.ReadLine();
@@ -73,6 +76,7 @@ namespace CSMDevHelper
                 if (logMatch.Success)
                 {
                     result = logMatch.Groups["MESSAGE"].Value;
+                    timestamp = logMatch.Groups["DATE"].Value + " " + logMatch.Groups["TIME"].Value; ;
                     // Workaround for incorrectly boolean variables
                     result = result.Replace("FALSE", "false");
                     result = result.Replace("TRUE", "true");
@@ -93,7 +97,7 @@ namespace CSMDevHelper
                     {
                         this.m_isModeling = !this.m_isModeling;
                     }
-                    else if (this.m_isModeling)
+                    if (this.m_isModeling)
                     {
                         code = LogCode.LOG_MODELING;
                     }
@@ -103,7 +107,7 @@ namespace CSMDevHelper
                     }
                 }
             }
-            return new LogResult(code, result);
+            return new LogResult(code, result, timestamp);
         }
     }
 }

@@ -19,6 +19,7 @@ namespace CSMDevHelper
         public string eventMonitorHandler;
         public string eventMonitorHandlerNode;
         public string eventMonitorHandlerExtension;
+        public string eventTimeStamp;
         public string eventModeling;
 
         public EventInfo()
@@ -30,6 +31,7 @@ namespace CSMDevHelper
             eventMonitorHandler = String.Empty;
             eventMonitorHandlerNode = String.Empty;
             eventMonitorHandlerExtension = String.Empty;
+            eventTimeStamp = String.Empty;
             eventModeling = String.Empty;
         }
     }
@@ -39,6 +41,7 @@ namespace CSMDevHelper
         public EventInfo eventInfo;
         public bool hasModeling;
         public bool isParked;
+        public HashSet<string> eventSetGCID;
 
         public string Monitor
         {
@@ -61,12 +64,15 @@ namespace CSMDevHelper
             {"CallClearedEvent" , Color.Orange}
         };
 
-        public EventNode(string jsonString)
+        public EventNode(string jsonString, string timestamp)
         {
             this.isParked = false;
             this.hasModeling = false;
-            eventInfo = new EventInfo();
+            this.eventInfo = new EventInfo();
+            this.eventSetGCID = new HashSet<string>();
             Match regMatch;
+
+            this.eventInfo.eventTimeStamp = timestamp;
             try
             {
                 // Workaround for parked events
@@ -155,27 +161,45 @@ namespace CSMDevHelper
                 this.eventInfo.eventMonitorHandlerExtension = "UnknownExtension";
             }
 
+            if (this.jsonDict.TryGetValue("CGCID", out outObject))
+            {
+                this.eventSetGCID.Add((string)outObject);
+            }
+            if (this.jsonDict.TryGetValue("PGCID", out outObject))
+            {
+                this.eventSetGCID.Add((string)outObject);
+            }
+            if (this.jsonDict.TryGetValue("SGCID", out outObject))
+            {
+                this.eventSetGCID.Add((string)outObject);
+            }
+
             this.Name = this.eventInfo.eventType;
 
             Color defaultColor;
             EventNode.colorDict.TryGetValue(this.eventInfo.eventType, out defaultColor);
             this.ForeColor = defaultColor;
-
-            this.Show();
         }
 
         public void Hide()
         {
             this.Nodes.Clear();
-            this.Text = "";
+            this.Text = String.Empty;
         }
         public void Show()
         {
             this.Nodes.AddRange(GenerateTree(this.jsonDict));
-            this.Text = this.eventInfo.eventType + ": " + this.eventInfo.eventCause;
+            this.Text = String.Format("{0,-25}: {1,-25} ({2,15})",
+                this.eventInfo.eventType, this.eventInfo.eventCause,
+                this.eventInfo.eventTimeStamp);
             if (this.isParked)
             {
-                this.Text = "PARKED: " + this.Text;
+                this.BackColor = Color.LightCoral;
+                this.Text = String.Format("{0} <== Parked", this.Text);
+            }
+            if (this.hasModeling)
+            {
+                this.BackColor = Color.LightGoldenrodYellow;
             }
         }
 

@@ -20,6 +20,7 @@ namespace CSMDevHelper
             InitializeComponent();
             this.isLogUpdate = false;
             this.rootNode = null;
+            this.dictGCID = new Dictionary<string, HashSet<string>>();
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
@@ -27,6 +28,9 @@ namespace CSMDevHelper
             treeLog.Nodes.Clear();
             cblstEvents.Items.Clear();
             cblstMonitors.Items.Clear();
+
+            treeLog.Enabled = false;
+            tcLogFilters.Enabled = false;
 
             btnLogStart.Enabled = false;
             btnLogStop.Enabled = true;
@@ -45,6 +49,9 @@ namespace CSMDevHelper
 
         private void btnLogStop_Click(object sender, EventArgs e)
         {
+            treeLog.Enabled = true;
+            tcLogFilters.Enabled = true;
+
             this.isLogUpdate = false;
             //this.logThread.Join();
             btnLogStart.Enabled = true;
@@ -60,12 +67,16 @@ namespace CSMDevHelper
                 btnLogPause.Text = "Resume";
                 // Deprecated and should be changed to more convenience manner
                 logThread.Suspend();
+                treeLog.Enabled = true;
+                tcLogFilters.Enabled = true;
             }
             else
             {
                 btnLogPause.Text = "Pause";
                 // Deprecated and should be changed to more convenience manner
                 logThread.Resume();
+                treeLog.Enabled = false;
+                tcLogFilters.Enabled = false;
             }
         }
 
@@ -73,8 +84,8 @@ namespace CSMDevHelper
         {
             LogResult update;
             //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
-            //LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
-            LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
+            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            //LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
             while(this.isLogUpdate)
             {
                 update = logReader.Process();
@@ -86,6 +97,7 @@ namespace CSMDevHelper
         {
             if (this.isLogUpdate)
             {
+                tsslEvents.Text = "Event count = " + treeLog.Nodes.Count;
                 switch (logResult.code)
                 {
                     case LogCode.LOG_MITAI:
@@ -96,6 +108,7 @@ namespace CSMDevHelper
                             {
                                 cblstEvents.Items.Add(this.rootNode.eventInfo.eventType, true);
                             }
+                            // Updating Monitor checklist
                             if (!cblstMonitors.Items.Contains(this.rootNode.Monitor))
                             {
                                 if (this.rootNode.eventInfo.eventMonitorHandlerExtension == "UnknownExtension")
@@ -107,11 +120,27 @@ namespace CSMDevHelper
                                     cblstMonitors.Items.Add(this.rootNode.Monitor, true);
                                 }
                             }
-                            // Updating Monitor checklist
-                            this.rootNode.Text = treeLog.Nodes.Count + "> " + this.rootNode.Text;
+                            //Updating GCID checklist
+                            foreach (string gcid in this.rootNode.eventSetGCID)
+                            {
+                                if (this.dictGCID.ContainsKey(gcid))
+                                {
+                                    this.dictGCID[gcid].Union(this.rootNode.eventSetGCID);
+                                }
+                                else
+                                {
+                                    this.dictGCID[gcid] = this.rootNode.eventSetGCID;
+                                }
+                                if (!cblstGCID.Items.Contains(gcid))
+                                {
+                                    cblstGCID.Items.Add(gcid);
+                                }
+                            }
+                            this.rootNode.Show();
+                            this.rootNode.Text = String.Format("{0,4}> {1}", treeLog.Nodes.Count, this.rootNode.Text);
                             treeLog.Nodes.Add(this.rootNode);
                         }
-                        this.rootNode = new EventNode(logResult.result);
+                        this.rootNode = new EventNode(logResult.result, logResult.timestamp);
                         break;
                     case LogCode.LOG_MODELING:
                         this.rootNode.hasModeling = true;
@@ -127,7 +156,7 @@ namespace CSMDevHelper
                         }
                         if (!this.rootNode.Text.StartsWith("***"))
                         {
-                            this.rootNode.Text = "*** " + this.rootNode.Text;
+                            this.rootNode.Text = String.Format("{0,3} {1}","***",this.rootNode.Text);
                         }
                         break;
                     case LogCode.LOG_LEG:
@@ -141,15 +170,35 @@ namespace CSMDevHelper
 
         private void cblstEvents_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cblstEvents.SelectedItem != null && cblstEvents.SelectedItem != String.Empty)
+            if (cblstEvents.SelectedItem != null && cblstEvents.SelectedItem.ToString() != String.Empty)
             {
                 if (!cblstEvents.GetItemChecked(cblstEvents.SelectedIndex))
                 {
                     foreach (EventNode node in treeLog.Nodes.Find(cblstEvents.SelectedItem.ToString(), false))
                     {
-                        treeLog.Nodes.Remove(node);
+                        node.Remove();
                     }
                     cblstEvents.Items.Remove(cblstEvents.SelectedItem);
+                }
+            }
+        }
+
+        private void cblstGCID_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cblstGCID.SelectedItem != null && cblstGCID.SelectedItem.ToString() != String.Empty)
+            {
+                int index = 0;
+                while (index < treeLog.Nodes.Count)
+                {
+                    EventNode node = (EventNode)treeLog.Nodes[index];
+                    if (!node.eventSetGCID.Overlaps(this.dictGCID[cblstGCID.SelectedItem.ToString()]))
+                    {
+                        node.Remove();
+                    }
+                    else
+                    {
+                        index++;
+                    }
                 }
             }
         }
