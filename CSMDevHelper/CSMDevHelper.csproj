@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomBindingList.cs" />
     <Compile Include="EventNode.cs" />
     <Compile Include="LogReader.cs" />
     <Compile Include="frmCSMDH.cs">

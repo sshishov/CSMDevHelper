@@ -54,6 +54,17 @@ namespace CSMDevHelper
             }
         }
 
+        public string EventType
+        {
+            get { return this.eventInfo.eventType; }
+        }
+
+        public string GCID
+        {
+            get { return ""; }
+        }
+
+
         public bool hasModeling
         {
             set

@@ -275,6 +275,7 @@ namespace CSMDevHelper
             this.lbMonitor.Name = "lbMonitor";
             this.lbMonitor.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lbMonitor.Size = new System.Drawing.Size(203, 342);
+            this.lbMonitor.Sorted = true;
             this.lbMonitor.TabIndex = 17;
             // 
             // lbFilterMonitor
@@ -284,6 +285,7 @@ namespace CSMDevHelper
             this.lbFilterMonitor.Name = "lbFilterMonitor";
             this.lbFilterMonitor.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lbFilterMonitor.Size = new System.Drawing.Size(203, 342);
+            this.lbFilterMonitor.Sorted = true;
             this.lbFilterMonitor.TabIndex = 16;
             // 
             // tbMonitor
@@ -366,6 +368,7 @@ namespace CSMDevHelper
             this.lbFilterGCID.Name = "lbFilterGCID";
             this.lbFilterGCID.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lbFilterGCID.Size = new System.Drawing.Size(203, 342);
+            this.lbFilterGCID.Sorted = true;
             this.lbFilterGCID.TabIndex = 23;
             // 
             // tbGCID
@@ -473,10 +476,14 @@ namespace CSMDevHelper
         private bool isLogUpdate;
         private EventNode rootNode;
         private Dictionary<string, HashSet<string>> dictGCID;
-        private BindingList<string> listMonitor;
-        private BindingList<string> listGCID;
-        private BindingList<string> listEvent;
-        private BindingList<EventNode> listNode;
+        private CustomBindingList<string> listMonitor;
+        private CustomBindingList<string> listGCID;
+        private CustomBindingList<string> listEvent;
+        private CustomBindingList<string> listFilterMonitor;
+        private CustomBindingList<string> listFilterGCID;
+        private CustomBindingList<string> listFilterEvent;
+        private CustomBindingList<EventNode> listNode;
+        private CustomBindingList<EventNode> listFilterNode;
 
         private Button btnDelAllEvent;
         private Button btnDelEvent;
