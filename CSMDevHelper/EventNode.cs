@@ -39,9 +39,9 @@ namespace CSMDevHelper
     class EventNode : TreeNode
     {
         public EventInfo eventInfo;
-        public bool hasModeling;
         public bool isParked;
         public HashSet<string> eventSetGCID;
+        private bool hasModelingString;
 
         public string Monitor
         {
@@ -51,6 +51,18 @@ namespace CSMDevHelper
                     return this.eventInfo.eventMonitorHandlerExtension;
                 else
                     return this.eventInfo.eventMonitorHandlerExtension + " (node" + this.eventInfo.eventMonitorHandlerNode + ")";
+            }
+        }
+
+        public bool hasModeling
+        {
+            set
+            {
+                if (this.hasModelingString == false && value == true)
+                {
+                    this.BackColor = Color.LightGoldenrodYellow;
+                    this.hasModelingString = true;
+                }
             }
         }
 
@@ -67,7 +79,7 @@ namespace CSMDevHelper
         public EventNode(string jsonString, string timestamp)
         {
             this.isParked = false;
-            this.hasModeling = false;
+            this.hasModelingString = false;
             this.eventInfo = new EventInfo();
             this.eventSetGCID = new HashSet<string>();
             Match regMatch;
@@ -83,7 +95,7 @@ namespace CSMDevHelper
                 }
                 // Workaround for old versions (DropEvent w/o comma)
                 jsonString = jsonString.Replace(@"false""", @"false,""");
-                //Workaround for hex integers
+                // Workaround for hex integers
                 //jsonString = new Regex(@"(?=\s\w+,)").Replace(jsonString, "$2");
                 //Console.WriteLine("JSON = ***" + jsonString + "***");
                 JavaScriptSerializer mySer = new JavaScriptSerializer();
@@ -174,33 +186,20 @@ namespace CSMDevHelper
                 this.eventSetGCID.Add((string)outObject);
             }
 
-            this.Name = this.eventInfo.eventType;
-
-            Color defaultColor;
-            EventNode.colorDict.TryGetValue(this.eventInfo.eventType, out defaultColor);
-            this.ForeColor = defaultColor;
-        }
-
-        public void Hide()
-        {
-            this.Nodes.Clear();
-            this.Text = String.Empty;
-        }
-        public void Show()
-        {
             this.Nodes.AddRange(GenerateTree(this.jsonDict));
-            this.Text = String.Format("{0,-25}: {1,-25} ({2,15})",
+
+            this.Name = this.eventInfo.eventType;
+            this.Text = String.Format("{0,-25}: {1,-20} ({2,15})",
                 this.eventInfo.eventType, this.eventInfo.eventCause,
                 this.eventInfo.eventTimeStamp);
             if (this.isParked)
             {
-                this.BackColor = Color.LightCoral;
                 this.Text = String.Format("{0} <== Parked", this.Text);
             }
-            if (this.hasModeling)
-            {
-                this.BackColor = Color.LightGoldenrodYellow;
-            }
+
+            Color defaultColor;
+            EventNode.colorDict.TryGetValue(this.eventInfo.eventType, out defaultColor);
+            this.ForeColor = defaultColor;
         }
 
         private TreeNode[] GenerateTree(Dictionary<string, object> dict)
@@ -238,6 +237,5 @@ namespace CSMDevHelper
             }
             return currentNodes;
         }
-
     }
 }

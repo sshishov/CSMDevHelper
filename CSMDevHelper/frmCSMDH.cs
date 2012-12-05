@@ -21,13 +21,20 @@ namespace CSMDevHelper
             this.isLogUpdate = false;
             this.rootNode = null;
             this.dictGCID = new Dictionary<string, HashSet<string>>();
+            this.listGCID = new BindingList<string>();
+            this.listMonitor = new BindingList<string>();
+            this.listEvent = new BindingList<string>();
+            this.listNode = new BindingList<EventNode>();
+            this.lbGCID.DataSource = this.listGCID;
+            this.lbMonitor.DataSource = this.listMonitor;
+            this.lbEvent.DataSource = this.listEvent;
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
         {
             treeLog.Nodes.Clear();
-            cblstEvents.Items.Clear();
-            cblstMonitors.Items.Clear();
+            //cblstEvents.Items.Clear();
+            //cblstMonitors.Items.Clear();
 
             treeLog.Enabled = false;
             tcLogFilters.Enabled = false;
@@ -84,8 +91,8 @@ namespace CSMDevHelper
         {
             LogResult update;
             //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
-            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
-            //LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
+            //LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
             while(this.isLogUpdate)
             {
                 update = logReader.Process();
@@ -101,49 +108,37 @@ namespace CSMDevHelper
                 switch (logResult.code)
                 {
                     case LogCode.LOG_MITAI:
-                        if (this.rootNode != null && this.rootNode.Name != "MonitorSetEvent")
-                        {
-                            // Updating Event checklist
-                            if (!cblstEvents.Items.Contains(this.rootNode.eventInfo.eventType))
-                            {
-                                cblstEvents.Items.Add(this.rootNode.eventInfo.eventType, true);
-                            }
-                            // Updating Monitor checklist
-                            if (!cblstMonitors.Items.Contains(this.rootNode.Monitor))
-                            {
-                                if (this.rootNode.eventInfo.eventMonitorHandlerExtension == "UnknownExtension")
-                                {
-                                    cblstMonitors.Items.Add(this.rootNode.Monitor, true);
-                                }
-                                else
-                                {
-                                    cblstMonitors.Items.Add(this.rootNode.Monitor, true);
-                                }
-                            }
-                            //Updating GCID checklist
-                            foreach (string gcid in this.rootNode.eventSetGCID)
-                            {
-                                if (this.dictGCID.ContainsKey(gcid))
-                                {
-                                    this.dictGCID[gcid].Union(this.rootNode.eventSetGCID);
-                                }
-                                else
-                                {
-                                    this.dictGCID[gcid] = this.rootNode.eventSetGCID;
-                                }
-                                if (!cblstGCID.Items.Contains(gcid))
-                                {
-                                    cblstGCID.Items.Add(gcid);
-                                }
-                            }
-                            this.rootNode.Show();
-                            this.rootNode.Text = String.Format("{0,4}> {1}", treeLog.Nodes.Count, this.rootNode.Text);
-                            treeLog.Nodes.Add(this.rootNode);
-                        }
                         this.rootNode = new EventNode(logResult.result, logResult.timestamp);
+                        // Updating Event checklist
+                        if (!lbEvent.Items.Contains(this.rootNode.eventInfo.eventType))
+                        {
+                            this.listEvent.Add(this.rootNode.eventInfo.eventType);
+                        }
+                        // Updating Monitor checklist
+                        if (!listMonitor.Contains(this.rootNode.Monitor))
+                        {
+                            listMonitor.Add(this.rootNode.Monitor);
+                        }
+                        //Updating GCID checklist
+                        foreach (string gcid in this.rootNode.eventSetGCID)
+                        {
+                            if (this.dictGCID.ContainsKey(gcid))
+                            {
+                                this.dictGCID[gcid].Union(this.rootNode.eventSetGCID);
+                            }
+                            else
+                            {
+                                this.dictGCID[gcid] = this.rootNode.eventSetGCID;
+                            }
+                            if (!listGCID.Contains(gcid))
+                            {
+                                listGCID.Add(gcid);
+                            }
+                        }
+                        this.rootNode.Text = String.Format("{0,4}> {1}", treeLog.Nodes.Count + 1, this.rootNode.Text);
+                        treeLog.Nodes.Add(this.rootNode);
                         break;
                     case LogCode.LOG_MODELING:
-                        this.rootNode.hasModeling = true;
                         if (this.rootNode.ToolTipText == String.Empty)
                         {
                             this.rootNode.eventInfo.eventModeling += logResult.result;
@@ -154,10 +149,8 @@ namespace CSMDevHelper
                             this.rootNode.eventInfo.eventModeling += Environment.NewLine + logResult.result;
                             this.rootNode.ToolTipText += Environment.NewLine + logResult.result;
                         }
-                        if (!this.rootNode.Text.StartsWith("***"))
-                        {
-                            this.rootNode.Text = String.Format("{0,3} {1}","***",this.rootNode.Text);
-                        }
+                        this.rootNode.hasModeling = true;
+                        //this.rootNode.BackColor = Color.LightGoldenrodYellow;
                         break;
                     case LogCode.LOG_LEG:
                         break;
@@ -168,39 +161,103 @@ namespace CSMDevHelper
             }
         }
 
-        private void cblstEvents_SelectedIndexChanged(object sender, EventArgs e)
+        private void tbMonitor_TextChanged(object sender, EventArgs e)
         {
-            if (cblstEvents.SelectedItem != null && cblstEvents.SelectedItem.ToString() != String.Empty)
+            IEnumerable<string> filtered = this.listMonitor.Where((i) => i.IndexOf(tbMonitor.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (filtered.Count<string>() != 0)
             {
-                if (!cblstEvents.GetItemChecked(cblstEvents.SelectedIndex))
-                {
-                    foreach (EventNode node in treeLog.Nodes.Find(cblstEvents.SelectedItem.ToString(), false))
-                    {
-                        node.Remove();
-                    }
-                    cblstEvents.Items.Remove(cblstEvents.SelectedItem);
-                }
+                lbMonitor.DataSource = new BindingSource(filtered, "");
+            }
+            else
+            {
+                lbMonitor.DataSource = null;
             }
         }
 
-        private void cblstGCID_SelectedIndexChanged(object sender, EventArgs e)
+        private void tbGCID_TextChanged(object sender, EventArgs e)
         {
-            if (cblstGCID.SelectedItem != null && cblstGCID.SelectedItem.ToString() != String.Empty)
+            IEnumerable<string> filtered = this.listGCID.Where((i) => i.IndexOf(tbGCID.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (filtered.Count<string>() != 0)
             {
-                int index = 0;
-                while (index < treeLog.Nodes.Count)
-                {
-                    EventNode node = (EventNode)treeLog.Nodes[index];
-                    if (!node.eventSetGCID.Overlaps(this.dictGCID[cblstGCID.SelectedItem.ToString()]))
-                    {
-                        node.Remove();
-                    }
-                    else
-                    {
-                        index++;
-                    }
-                }
+                lbGCID.DataSource = new BindingSource(filtered, "");
             }
+            else
+            {
+                lbGCID.DataSource = null;
+            }
+        }
+
+        private void tbEvent_TextChanged(object sender, EventArgs e)
+        {
+            IEnumerable<string> filtered = this.listEvent.Where((i) => i.IndexOf(tbEvent.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (filtered.Count<string>() != 0)
+            {
+                lbEvent.DataSource = new BindingSource(filtered, "");
+            }
+            else
+            {
+                lbEvent.DataSource = null;
+            }
+        }
+
+        private void btnAddEvent_Click(object sender, EventArgs e)
+        {
+            foreach (string item in lbEvent.SelectedItems) { if (!lbFilterEvent.Items.Contains(item)) { lbFilterEvent.Items.Add(item); } }
+        }
+
+        private void btnAddAllEvent_Click(object sender, EventArgs e)
+        {
+            foreach (string item in lbEvent.Items) { if (!lbFilterEvent.Items.Contains(item)) { lbFilterEvent.Items.Add(item); } }
+        }
+
+        private void btnDelEvent_Click(object sender, EventArgs e)
+        {
+            while (lbFilterEvent.SelectedItems.Count > 0) { lbFilterEvent.Items.Remove(lbFilterEvent.SelectedItem); }
+        }
+
+        private void btnDelAllEvent_Click(object sender, EventArgs e)
+        {
+            lbFilterEvent.Items.Clear();
+        }
+
+        private void btnAddMonitor_Click(object sender, EventArgs e)
+        {
+            foreach (string item in lbMonitor.SelectedItems) { if (!lbFilterMonitor.Items.Contains(item)) { lbFilterMonitor.Items.Add(item); } }
+        }
+
+        private void btnAddAllMonitor_Click(object sender, EventArgs e)
+        {
+            foreach (string item in lbMonitor.Items) { if (!lbFilterMonitor.Items.Contains(item)) { lbFilterMonitor.Items.Add(item); } }
+        }
+
+        private void btnDelMonitor_Click(object sender, EventArgs e)
+        {
+            while (lbFilterMonitor.SelectedItems.Count > 0) { lbFilterMonitor.Items.Remove(lbFilterMonitor.SelectedItem); }
+        }
+
+        private void btnDelAllMonitor_Click(object sender, EventArgs e)
+        {
+            lbFilterMonitor.Items.Clear();
+        }
+
+        private void btnAddGCID_Click(object sender, EventArgs e)
+        {
+            foreach (string item in lbGCID.SelectedItems) { if (!lbFilterGCID.Items.Contains(item)) { lbFilterGCID.Items.Add(item); } }
+        }
+
+        private void btnAddAllGCID_Click(object sender, EventArgs e)
+        {
+            foreach (string item in lbGCID.Items) { if (!lbFilterGCID.Items.Contains(item)) { lbFilterGCID.Items.Add(item); } }
+        }
+
+        private void btnDelGCID_Click(object sender, EventArgs e)
+        {
+            while (lbFilterGCID.SelectedItems.Count > 0) { lbFilterGCID.Items.Remove(lbFilterGCID.SelectedItem); }
+        }
+
+        private void btnDelAllGCID_Click(object sender, EventArgs e)
+        {
+            lbFilterGCID.Items.Clear();
         }
     }
 }
