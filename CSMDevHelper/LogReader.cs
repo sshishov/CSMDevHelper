@@ -8,21 +8,21 @@ using System.Windows.Forms;
 
 namespace CSMDevHelper
 {
-    public static class LogCode
+    public enum LogCode: int
     {
-        public const int LOG_NOTHING = 0;
-        public const int LOG_MITAI = 1;
-        public const int LOG_LEG = 2;
-        public const int LOG_MODELING = 3;
+        LOG_NOTHING = 0,
+        LOG_MITAI = 1,
+        LOG_LEG = 2,
+        LOG_MODELING = 3,
     };
 
     public class LogResult
     {
-        public int code;
+        public LogCode code;
         public string result;
         public string timestamp;
 
-        public LogResult(int code, string result, string timestamp)
+        public LogResult(LogCode code, string result, string timestamp)
         {
             this.code = code;
             this.result = result;
@@ -66,7 +66,7 @@ namespace CSMDevHelper
         {
             string result = String.Empty;
             string timestamp = String.Empty;
-            int code = -1;
+            LogCode code = LogCode.LOG_NOTHING;
             Match logMatch;
             result = this.m_streamReader.ReadLine();
             if (result != null && result != String.Empty)
@@ -100,10 +100,6 @@ namespace CSMDevHelper
                     if (this.m_isModeling)
                     {
                         code = LogCode.LOG_MODELING;
-                    }
-                    else
-                    {
-                        code = LogCode.LOG_NOTHING;
                     }
                 }
             }

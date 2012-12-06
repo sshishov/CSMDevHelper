@@ -67,6 +67,9 @@ namespace CSMDevHelper
             this.btnLogStop = new System.Windows.Forms.Button();
             this.btnLogStart = new System.Windows.Forms.Button();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
+            this.tbFilterGCID = new System.Windows.Forms.TextBox();
+            this.tbFilterMonitor = new System.Windows.Forms.TextBox();
+            this.tbFilterEvent = new System.Windows.Forms.TextBox();
             this.tcCSMDH.SuspendLayout();
             this.tbLogPage.SuspendLayout();
             this.ssEvents.SuspendLayout();
@@ -130,6 +133,7 @@ namespace CSMDevHelper
             // 
             // tbEventFilterPage
             // 
+            this.tbEventFilterPage.Controls.Add(this.tbFilterEvent);
             this.tbEventFilterPage.Controls.Add(this.btnDelAllEvent);
             this.tbEventFilterPage.Controls.Add(this.btnDelEvent);
             this.tbEventFilterPage.Controls.Add(this.btnAddAllEvent);
@@ -213,6 +217,7 @@ namespace CSMDevHelper
             // 
             // tbMonitorFilterPage
             // 
+            this.tbMonitorFilterPage.Controls.Add(this.tbFilterMonitor);
             this.tbMonitorFilterPage.Controls.Add(this.btnDelAllMonitor);
             this.tbMonitorFilterPage.Controls.Add(this.btnDelMonitor);
             this.tbMonitorFilterPage.Controls.Add(this.btnAddAllMonitor);
@@ -298,6 +303,7 @@ namespace CSMDevHelper
             // 
             // tbGCIDPage
             // 
+            this.tbGCIDPage.Controls.Add(this.tbFilterGCID);
             this.tbGCIDPage.Controls.Add(this.btnDelAllGCID);
             this.tbGCIDPage.Controls.Add(this.btnDelGCID);
             this.tbGCIDPage.Controls.Add(this.btnAddAllGCID);
@@ -431,6 +437,30 @@ namespace CSMDevHelper
             this.tbGeneralPage.Text = "General";
             this.tbGeneralPage.UseVisualStyleBackColor = true;
             // 
+            // tbFilterGCID
+            // 
+            this.tbFilterGCID.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterGCID.Name = "tbFilterGCID";
+            this.tbFilterGCID.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterGCID.TabIndex = 29;
+            this.tbFilterGCID.TextChanged += new System.EventHandler(this.tbFilterGCID_TextChanged);
+            // 
+            // tbFilterMonitor
+            // 
+            this.tbFilterMonitor.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterMonitor.Name = "tbFilterMonitor";
+            this.tbFilterMonitor.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterMonitor.TabIndex = 22;
+            this.tbFilterMonitor.TextChanged += new System.EventHandler(this.tbFilterMonitor_TextChanged);
+            // 
+            // tbFilterEvent
+            // 
+            this.tbFilterEvent.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterEvent.Name = "tbFilterEvent";
+            this.tbFilterEvent.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterEvent.TabIndex = 22;
+            this.tbFilterEvent.TextChanged += new System.EventHandler(this.tbFilterEvent_TextChanged);
+            // 
             // frmCSMDH
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -506,6 +536,9 @@ namespace CSMDevHelper
         private ListBox lbGCID;
         private ListBox lbFilterGCID;
         private TextBox tbGCID;
+        private TextBox tbFilterGCID;
+        private TextBox tbFilterEvent;
+        private TextBox tbFilterMonitor;
     }
 }
 

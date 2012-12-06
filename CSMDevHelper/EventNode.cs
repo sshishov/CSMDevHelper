@@ -10,70 +10,106 @@ using System.Text.RegularExpressions;
 
 namespace CSMDevHelper
 {
+
+    enum FilterComparator: int
+    {
+        EVENT_TYPE = 0,
+        EVENT_MONITOR = 1,
+        EVENT_GCID = 2,
+    };
+
     class EventInfo
     {
-        public string eventType;
-        public string eventTypeNumber;
-        public string eventCause;
-        public string eventCauseNumber;
-        public string eventMonitorHandler;
-        public string eventMonitorHandlerNode;
-        public string eventMonitorHandlerExtension;
-        public string eventTimeStamp;
-        public string eventModeling;
+        public string Type;
+        public string TypeNumber;
+        public string Cause;
+        public string CauseNumber;
+        public string MonitorHandler;
+        public string MonitorHandlerNode;
+        public string MonitorHandlerExtension;
+        public string TimeStamp;
+        public string Modeling;
+        public string CGCID;
+        public string PGCID;
+        public string SGCID;
+        public bool isParked;
 
         public EventInfo()
         {
-            eventType = String.Empty;
-            eventTypeNumber = String.Empty;
-            eventCause = String.Empty;
-            eventCauseNumber = String.Empty;
-            eventMonitorHandler = String.Empty;
-            eventMonitorHandlerNode = String.Empty;
-            eventMonitorHandlerExtension = String.Empty;
-            eventTimeStamp = String.Empty;
-            eventModeling = String.Empty;
+            Type = "UnknownType";
+            TypeNumber = "N/A";
+            Cause = "UnknownCause";
+            CauseNumber = "N/A";
+            MonitorHandler = default(string);
+            MonitorHandlerNode = default(string);
+            MonitorHandlerExtension = "UnknownExtension";
+            TimeStamp = default(string);
+            Modeling = default(string);
+            CGCID = default(string);
+            PGCID = default(string);
+            SGCID = default(string);
+            isParked = default(bool);
         }
     }
 
     class EventNode : TreeNode
     {
         public EventInfo eventInfo;
-        public bool isParked;
-        public HashSet<string> eventSetGCID;
-        private bool hasModelingString;
+        public int filterCount;
+
+        public bool hasModeling
+        {
+            get{ return this.eventInfo.Modeling != default(String); }
+        }
 
         public string Monitor
         {
             get
             {
-                if (this.eventInfo.eventMonitorHandlerNode == String.Empty)
-                    return this.eventInfo.eventMonitorHandlerExtension;
+                if (this.eventInfo.MonitorHandlerNode == default(string))
+                    return this.eventInfo.MonitorHandlerExtension;
                 else
-                    return this.eventInfo.eventMonitorHandlerExtension + " (node" + this.eventInfo.eventMonitorHandlerNode + ")";
+                    return String.Format("{0} (node {1})", this.eventInfo.MonitorHandlerExtension, this.eventInfo.MonitorHandlerNode);
             }
         }
-
-        public string EventType
+        
+        public bool Parked
         {
-            get { return this.eventInfo.eventType; }
+            get { return this.eventInfo.isParked; }
         }
 
-        public string GCID
+        public bool Compare(FilterComparator attribute, string value)
         {
-            get { return ""; }
-        }
-
-
-        public bool hasModeling
-        {
-            set
+            bool result = default(bool);
+            switch (attribute)
             {
-                if (this.hasModelingString == false && value == true)
-                {
-                    this.BackColor = Color.LightGoldenrodYellow;
-                    this.hasModelingString = true;
-                }
+                case FilterComparator.EVENT_TYPE:
+                    result = (this.eventInfo.Type == value);
+                    break;
+                case FilterComparator.EVENT_MONITOR:
+                    result = (this.Monitor == value);
+                    break;
+                case FilterComparator.EVENT_GCID:
+                    result = this.GCID.Contains(value);
+                    break;
+            }
+            return result;
+        }
+
+        public HashSet<String> GCID
+        {
+            get
+            {
+                HashSet<String> result = new HashSet<String>();
+                if (this.eventInfo.CGCID != default(string))
+                    result.Add(this.eventInfo.CGCID);
+                if (this.eventInfo.PGCID != default(string))
+                    result.Add(this.eventInfo.PGCID);
+                if (this.eventInfo.SGCID != default(string))
+                    result.Add(this.eventInfo.SGCID);
+                if (result.Count == 0)
+                    result.Add("N/A");
+                return result;
             }
         }
 
@@ -89,20 +125,18 @@ namespace CSMDevHelper
 
         public EventNode(string jsonString, string timestamp)
         {
-            this.isParked = false;
-            this.hasModelingString = false;
             this.eventInfo = new EventInfo();
-            this.eventSetGCID = new HashSet<string>();
+            this.filterCount = 0;
             Match regMatch;
 
-            this.eventInfo.eventTimeStamp = timestamp;
+            this.eventInfo.TimeStamp = timestamp;
             try
             {
                 // Workaround for parked events
                 if (jsonString.Contains("{*** Processing Parked Event ***}"))
                 {
                     jsonString = jsonString.Replace("{*** Processing Parked Event ***}", "");
-                    this.isParked = true;
+                    this.eventInfo.isParked = true;
                 }
                 // Workaround for old versions (DropEvent w/o comma)
                 jsonString = jsonString.Replace(@"false""", @"false,""");
@@ -126,90 +160,61 @@ namespace CSMDevHelper
                 regMatch = Regex.Match((string)this.jsonDict["Type"], @"^(?<TYPE>\D+)\((?<TYPENUM>\d+)\)");
                 if (regMatch.Success)
                 {
-                    this.eventInfo.eventType = regMatch.Groups["TYPE"].Value;
-                    this.eventInfo.eventTypeNumber = regMatch.Groups["TYPENUM"].Value;
+                    this.eventInfo.Type = regMatch.Groups["TYPE"].Value;
+                    this.eventInfo.TypeNumber = regMatch.Groups["TYPENUM"].Value;
                 }
-                else
-                {
-                    this.eventInfo.eventType = "UnknownType";
-                    this.eventInfo.eventTypeNumber = "N/A";
-                }
-            }
-            else
-            {
-                this.eventInfo.eventType = "UnknownType";
-                this.eventInfo.eventTypeNumber = "N/A";
             }
             if (this.jsonDict.TryGetValue("Cause", out outObject))
             {
                 regMatch = Regex.Match((string)outObject, @"^(?<CAUSE>\D+)\((?<CAUSENUM>\d+)\)");
                 if (regMatch.Success)
                 {
-                    this.eventInfo.eventCause = regMatch.Groups["CAUSE"].Value;
-                    this.eventInfo.eventCauseNumber = regMatch.Groups["CAUSENUM"].Value;
-                }
-                else
-                {
-                    this.eventInfo.eventCause = "UnknownCause";
-                    this.eventInfo.eventCauseNumber = "N/A";
+                    this.eventInfo.Cause = regMatch.Groups["CAUSE"].Value;
+                    this.eventInfo.CauseNumber = regMatch.Groups["CAUSENUM"].Value;
                 }
             }
-            else
-            {
-                this.eventInfo.eventCause = "UnknownCause";
-                this.eventInfo.eventCauseNumber = "N/A";
-            }
-
             if (this.jsonDict.TryGetValue("MonitorHandle", out outObject))
             {
                 regMatch = Regex.Match((string)outObject, @"^(?<MONITOR>.+)\((?<MONITORNUM>.*)\)");
                 if (regMatch.Success)
                 {
-                    this.eventInfo.eventMonitorHandler = regMatch.Groups["MONITOR"].Value;
-                    this.eventInfo.eventMonitorHandlerExtension = regMatch.Groups["MONITORNUM"].Value;
+                    this.eventInfo.MonitorHandler = regMatch.Groups["MONITOR"].Value;
+                    this.eventInfo.MonitorHandlerExtension = regMatch.Groups["MONITORNUM"].Value;
                     regMatch = Regex.Match(regMatch.Groups["MONITORNUM"].Value, @"(?<MONITORNODE>.*)\|(?<MONITORNUM>.*)");
                     if (regMatch.Success)
                     {
-                        this.eventInfo.eventMonitorHandlerNode = regMatch.Groups["MONITORNODE"].Value;
-                        this.eventInfo.eventMonitorHandlerExtension = regMatch.Groups["MONITORNUM"].Value;
+                        this.eventInfo.MonitorHandlerNode = regMatch.Groups["MONITORNODE"].Value;
+                        this.eventInfo.MonitorHandlerExtension = regMatch.Groups["MONITORNUM"].Value;
                     }
                 }
-                else
-                {
-                    this.eventInfo.eventMonitorHandlerExtension = "UnknownExtension";
-                }
-            }
-            else
-            {
-                this.eventInfo.eventMonitorHandlerExtension = "UnknownExtension";
             }
 
             if (this.jsonDict.TryGetValue("CGCID", out outObject))
             {
-                this.eventSetGCID.Add((string)outObject);
+                this.eventInfo.CGCID = (string)outObject;
             }
             if (this.jsonDict.TryGetValue("PGCID", out outObject))
             {
-                this.eventSetGCID.Add((string)outObject);
+                this.eventInfo.PGCID = (string)outObject;
             }
             if (this.jsonDict.TryGetValue("SGCID", out outObject))
             {
-                this.eventSetGCID.Add((string)outObject);
+                this.eventInfo.SGCID = (string)outObject;
             }
 
             this.Nodes.AddRange(GenerateTree(this.jsonDict));
 
-            this.Name = this.eventInfo.eventType;
+            this.Name = this.eventInfo.Type;
             this.Text = String.Format("{0,-25}: {1,-20} ({2,15})",
-                this.eventInfo.eventType, this.eventInfo.eventCause,
-                this.eventInfo.eventTimeStamp);
-            if (this.isParked)
+                this.eventInfo.Type, this.eventInfo.Cause,
+                this.eventInfo.TimeStamp);
+            if (this.Parked)
             {
                 this.Text = String.Format("{0} <== Parked", this.Text);
             }
 
             Color defaultColor;
-            EventNode.colorDict.TryGetValue(this.eventInfo.eventType, out defaultColor);
+            EventNode.colorDict.TryGetValue(this.eventInfo.Type, out defaultColor);
             this.ForeColor = defaultColor;
         }
 

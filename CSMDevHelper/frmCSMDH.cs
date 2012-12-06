@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.Web.Script.Serialization;
+using System.Reflection;
 
 namespace CSMDevHelper
 {
@@ -57,8 +58,6 @@ namespace CSMDevHelper
             listFilterNode.Clear();
             listMonitor.Clear();
             listFilterMonitor.Clear();
-            //cblstEvents.Items.Clear();
-            //cblstMonitors.Items.Clear();
 
             treeLog.Enabled = false;
             tcLogFilters.Enabled = false;
@@ -133,9 +132,9 @@ namespace CSMDevHelper
                     case LogCode.LOG_MITAI:
                         this.rootNode = new EventNode(logResult.result, logResult.timestamp);
                         // Updating Event checklist
-                        if (!lbEvent.Items.Contains(this.rootNode.eventInfo.eventType))
+                        if (!lbEvent.Items.Contains(this.rootNode.eventInfo.Type))
                         {
-                            this.listEvent.Add(this.rootNode.eventInfo.eventType);
+                            this.listEvent.Add(this.rootNode.eventInfo.Type);
                         }
                         // Updating Monitor checklist
                         if (!listMonitor.Contains(this.rootNode.Monitor))
@@ -143,15 +142,15 @@ namespace CSMDevHelper
                             listMonitor.Add(this.rootNode.Monitor);
                         }
                         //Updating GCID checklist
-                        foreach (string gcid in this.rootNode.eventSetGCID)
+                        foreach (string gcid in this.rootNode.GCID)
                         {
                             if (this.dictGCID.ContainsKey(gcid))
                             {
-                                this.dictGCID[gcid].Union(this.rootNode.eventSetGCID);
+                                this.dictGCID[gcid].Union(this.rootNode.GCID);
                             }
                             else
                             {
-                                this.dictGCID[gcid] = this.rootNode.eventSetGCID;
+                                this.dictGCID[gcid] = this.rootNode.GCID;
                             }
                             if (!listGCID.Contains(gcid))
                             {
@@ -164,15 +163,15 @@ namespace CSMDevHelper
                     case LogCode.LOG_MODELING:
                         if (this.rootNode.ToolTipText == String.Empty)
                         {
-                            this.rootNode.eventInfo.eventModeling += logResult.result;
+                            this.rootNode.eventInfo.Modeling += logResult.result;
                             this.rootNode.ToolTipText += logResult.result;
                         }
                         else
                         {
-                            this.rootNode.eventInfo.eventModeling += Environment.NewLine + logResult.result;
+                            this.rootNode.eventInfo.Modeling += Environment.NewLine + logResult.result;
                             this.rootNode.ToolTipText += Environment.NewLine + logResult.result;
                         }
-                        this.rootNode.hasModeling = true;
+                        this.rootNode.BackColor = Color.LightGoldenrodYellow;
                         break;
                     case LogCode.LOG_LEG:
                         break;
@@ -183,185 +182,171 @@ namespace CSMDevHelper
             }
         }
 
+        private void tbEvent_TextChanged(object sender, EventArgs e)
+        {
+            TextboxUpdate(sender, e, lbEvent, tbEvent, listEvent);
+        }
+
+        private void tbFilterEvent_TextChanged(object sender, EventArgs e)
+        {
+            TextboxUpdate(sender, e, lbFilterEvent, tbFilterEvent, listFilterEvent);
+        }
+
         private void tbMonitor_TextChanged(object sender, EventArgs e)
         {
-            IEnumerable<string> filtered = this.listMonitor.Where((i) => i.IndexOf(tbMonitor.Text, StringComparison.OrdinalIgnoreCase) >= 0);
-            if (filtered.Count<string>() != 0)
-            {
-                lbMonitor.DataSource = new BindingSource(filtered, "");
-            }
-            else
-            {
-                lbMonitor.DataSource = null;
-            }
+            TextboxUpdate(sender, e, lbMonitor, tbMonitor, listMonitor);
+        }
+
+        private void tbFilterMonitor_TextChanged(object sender, EventArgs e)
+        {
+            TextboxUpdate(sender, e, lbFilterMonitor, tbFilterMonitor, listFilterMonitor);
         }
 
         private void tbGCID_TextChanged(object sender, EventArgs e)
         {
-            IEnumerable<string> filtered = this.listGCID.Where((i) => i.IndexOf(tbGCID.Text, StringComparison.OrdinalIgnoreCase) >= 0);
-            if (filtered.Count<string>() != 0)
-            {
-                lbGCID.DataSource = new BindingSource(filtered, "");
-            }
-            else
-            {
-                lbGCID.DataSource = null;
-            }
+            TextboxUpdate(sender, e, lbGCID, tbGCID, listGCID);
         }
 
-        private void tbEvent_TextChanged(object sender, EventArgs e)
+        private void tbFilterGCID_TextChanged(object sender, EventArgs e)
         {
-            IEnumerable<string> filtered = this.listEvent.Where((i) => i.IndexOf(tbEvent.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+            TextboxUpdate(sender, e, lbFilterGCID, tbFilterGCID, listFilterGCID);
+        }
+
+        private void TextboxUpdate(object sender, EventArgs e, ListBox lb, TextBox tb, BindingList<string> lst)
+        {
+            IEnumerable<string> filtered = lst.Where((i) => i.IndexOf(tb.Text, StringComparison.OrdinalIgnoreCase) >= 0);
             if (filtered.Count<string>() != 0)
             {
-                lbEvent.DataSource = new BindingSource(filtered, "");
+                lb.DataSource = new BindingSource(filtered, "");
             }
             else
             {
-                lbEvent.DataSource = null;
+                lb.DataSource = null;
             }
         }
 
         private void btnAddEvent_Click(object sender, EventArgs e)
         {
-            int[] arr = new int[lbEvent.SelectedItems.Count];
-            lbEvent.SelectedIndices.CopyTo(arr, 0);
-            for (int index = lbEvent.SelectedItems.Count - 1; index >= 0; index--)
-            {
-                string item = (string)lbEvent.Items[arr[index]];
-                listFilterEvent.Add(item);
-                listEvent.Remove(item);
-            }
-            this.tbEvent_TextChanged(sender, e);
-            lbEvent.ClearSelected();
+            btnFilter(sender, e, lbEvent, tbEvent, tbFilterEvent, listEvent, listFilterEvent);
         }
 
         private void btnAddAllEvent_Click(object sender, EventArgs e)
         {
-            foreach (string item in listEvent) { listFilterEvent.Add(item); }
-            listEvent.Clear();
-            this.tbEvent_TextChanged(sender, e);
-            lbEvent.ClearSelected();
+            btnFilterAll(sender, e, lbEvent, tbEvent, tbFilterEvent, listEvent, listFilterEvent);
         }
 
         private void btnDelEvent_Click(object sender, EventArgs e)
         {
-            int[] arr = new int[lbFilterEvent.SelectedItems.Count];
-            lbFilterEvent.SelectedIndices.CopyTo(arr, 0);
-            for (int index = lbFilterEvent.SelectedItems.Count - 1; index >= 0; index--)
-            {
-                listEvent.Add(listFilterEvent[arr[index]]);
-                listFilterEvent.RemoveAt(arr[index]);
-            }
-            this.tbEvent_TextChanged(sender, e);
-            lbFilterEvent.ClearSelected();
+            btnFilter(sender, e, lbFilterEvent, tbEvent, tbFilterEvent, listFilterEvent, listEvent);
         }
 
         private void btnDelAllEvent_Click(object sender, EventArgs e)
         {
-            foreach (string item in listFilterEvent) { listEvent.Add(item); }
-            listFilterEvent.Clear();
-            this.tbEvent_TextChanged(sender, e);
-            lbFilterEvent.ClearSelected();
+            btnFilterAll(sender, e, lbFilterEvent, tbEvent, tbFilterEvent, listFilterEvent, listEvent);
         }
+
 
         private void btnAddMonitor_Click(object sender, EventArgs e)
         {
-            int[] arr = new int[lbMonitor.SelectedItems.Count];
-            lbMonitor.SelectedIndices.CopyTo(arr, 0);
-            for (int index = lbMonitor.SelectedItems.Count - 1; index >= 0; index--)
-            {
-                string item = (string)lbMonitor.Items[arr[index]];
-                listFilterMonitor.Add(item);
-                listMonitor.Remove(item);
-            }
-            this.tbMonitor_TextChanged(sender, e);
-            lbMonitor.ClearSelected();
+            btnFilter(sender, e, lbMonitor, tbMonitor, tbFilterMonitor, listMonitor, listFilterMonitor);
         }
 
         private void btnAddAllMonitor_Click(object sender, EventArgs e)
         {
-            foreach (string item in listMonitor) { listFilterMonitor.Add(item); }
-            listMonitor.Clear();
-            this.tbMonitor_TextChanged(sender, e);
-            lbMonitor.ClearSelected();
+            btnFilterAll(sender, e, lbMonitor, tbMonitor, tbFilterMonitor, listMonitor, listFilterMonitor);
         }
 
         private void btnDelMonitor_Click(object sender, EventArgs e)
         {
-            int[] arr = new int[lbFilterMonitor.SelectedItems.Count];
-            lbFilterMonitor.SelectedIndices.CopyTo(arr, 0);
-            for (int index = lbFilterMonitor.SelectedItems.Count - 1; index >= 0; index--)
-            {
-                listMonitor.Add(listFilterMonitor[arr[index]]);
-                listFilterMonitor.RemoveAt(arr[index]);
-            }
-            this.tbMonitor_TextChanged(sender, e);
-            lbFilterMonitor.ClearSelected();
+            btnFilter(sender, e, lbFilterMonitor, tbMonitor, tbFilterMonitor, listFilterMonitor, listMonitor);
         }
 
         private void btnDelAllMonitor_Click(object sender, EventArgs e)
         {
-            foreach (string item in listFilterMonitor) { listMonitor.Add(item); }
-            listFilterMonitor.Clear();
-            this.tbMonitor_TextChanged(sender, e);
-            lbFilterMonitor.ClearSelected();
+            btnFilterAll(sender, e, lbFilterMonitor, tbMonitor, tbFilterMonitor, listFilterMonitor, listMonitor);
         }
 
         private void btnAddGCID_Click(object sender, EventArgs e)
         {
-            int[] arr = new int[lbGCID.SelectedItems.Count];
-            lbGCID.SelectedIndices.CopyTo(arr, 0);
-            for (int index = lbGCID.SelectedItems.Count - 1; index >= 0; index--)
-            {
-                string item = (string)lbGCID.Items[arr[index]];
-                listFilterGCID.Add(item);
-                listGCID.Remove(item);
-            }
-            this.tbGCID_TextChanged(sender, e);
-            lbGCID.ClearSelected();
+            btnFilter(sender, e, lbGCID, tbGCID, tbFilterGCID, listGCID, listFilterGCID);
         }
 
         private void btnAddAllGCID_Click(object sender, EventArgs e)
         {
-            foreach (string item in listGCID) { listFilterGCID.Add(item); }
-            listGCID.Clear();
-            this.tbGCID_TextChanged(sender, e);
-            lbGCID.ClearSelected();
+            btnFilterAll(sender, e, lbGCID, tbGCID, tbFilterGCID, listGCID, listFilterGCID);
         }
 
         private void btnDelGCID_Click(object sender, EventArgs e)
         {
-            int[] arr = new int[lbFilterGCID.SelectedItems.Count];
-            lbFilterGCID.SelectedIndices.CopyTo(arr, 0);
-            for (int index = lbFilterGCID.SelectedItems.Count - 1; index >= 0; index--)
-            {
-                listGCID.Add(listFilterGCID[arr[index]]);
-                listFilterGCID.RemoveAt(arr[index]);
-            }
-            this.tbGCID_TextChanged(sender, e);
-            lbFilterGCID.ClearSelected();
+            btnFilter(sender, e, lbFilterGCID, tbGCID, tbFilterGCID, listFilterGCID, listGCID);
         }
 
         private void btnDelAllGCID_Click(object sender, EventArgs e)
         {
-            foreach (string item in listFilterGCID) { listGCID.Add(item); }
-            listFilterGCID.Clear();
-            this.tbGCID_TextChanged(sender, e);
-            lbFilterGCID.ClearSelected();
+            btnFilterAll(sender, e, lbFilterGCID, tbGCID, tbFilterGCID, listFilterGCID, listGCID);
+        }
+
+        private void btnFilter(object sender, EventArgs e, ListBox lb, TextBox tb1, TextBox tb2, BindingList<string> lstDel, BindingList<string> lstAdd)
+        {
+            int[] arr = new int[lb.SelectedItems.Count];
+            lb.SelectedIndices.CopyTo(arr, 0);
+            for (int index = lb.SelectedItems.Count - 1; index >= 0; index--)
+            {
+                string item = (string)lb.Items[arr[index]];
+                lstAdd.Add(item);
+                lstDel.Remove(item);
+            }
+            FireEvent(tb1, "TextChanged", e);
+            FireEvent(tb2, "TextChanged", e);
+            lb.ClearSelected();
+        }
+
+        private void btnFilterAll(object sender, EventArgs e, ListBox lb, TextBox tb1, TextBox tb2, BindingList<string> lstDel, BindingList<string> lstAdd)
+        {
+            for (int index = 0; index < lb.Items.Count; index++)
+            {
+                lb.SetSelected(index, true);
+            }
+            btnFilter(sender, e, lb, tb1, tb2, lstDel, lstAdd);
         }
 
 
-        private void HandleFilter(CustomBindingList<string> sender, ListChangedEventArgs e, string AttrName)
+        private void listFilterEvent_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            CustomBindingList<string> handler = (CustomBindingList<string>)sender;
+            HandleFilter(handler, e, FilterComparator.EVENT_TYPE);
+        }
+
+        private void listFilterMonitor_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            CustomBindingList<string> handler = (CustomBindingList<string>)sender;
+            HandleFilter(handler, e, FilterComparator.EVENT_MONITOR);
+        }
+
+        private void listFilterGCID_ListChanged(object sender, ListChangedEventArgs e)
+        {
+            CustomBindingList<string> handler = (CustomBindingList<string>)sender;
+            HandleFilter(handler, e, FilterComparator.EVENT_GCID);
+        }
+
+        private void HandleFilter(CustomBindingList<string> sender, ListChangedEventArgs e, FilterComparator compareAttribute)
         {
             switch (e.ListChangedType)
             {
                 case ListChangedType.ItemAdded:
+                    foreach (EventNode node in listFilterNode)
+                    {
+                        if (node.Compare(compareAttribute, sender[e.NewIndex]))
+                            node.filterCount += 1;
+                    }
+
                     for (int index = listNode.Count - 1; index >= 0; index--)
                     {
-                        if ((string)listNode[index].GetType().GetProperty(AttrName).GetValue(listNode[index], null) == sender[e.NewIndex])
+                        EventNode node = listNode[index];
+                        if (node.Compare(compareAttribute, sender[e.NewIndex]))
                         {
-                            listFilterNode.Add(listNode[index]);
+                            node.filterCount += 1;
+                            listFilterNode.Add(node);
                             listNode.RemoveAt(index);
                         }
                     }
@@ -369,10 +354,15 @@ namespace CSMDevHelper
                 case ListChangedType.ItemDeleted:
                     for (int index = listFilterNode.Count - 1; index >= 0; index--)
                     {
-                        if ((string)listFilterNode[index].GetType().GetProperty(AttrName).GetValue(listFilterNode[index], null) == sender.RemovedItem)
+                        EventNode node = listFilterNode[index];
+                        if (node.Compare(compareAttribute, sender.RemovedItem))
                         {
-                            listNode.Add(listFilterNode[index]);
-                            listFilterNode.RemoveAt(index);
+                            node.filterCount -= 1;
+                            if (node.filterCount == 0)
+                            {
+                                listNode.Add(listFilterNode[index]);
+                                listFilterNode.RemoveAt(index);
+                            }
                         }
                     }
                     break;
@@ -388,23 +378,6 @@ namespace CSMDevHelper
             }
         }
 
-        private void listFilterEvent_ListChanged(object sender, ListChangedEventArgs e)
-        {
-            CustomBindingList<string> handler = (CustomBindingList<string>)sender;
-            HandleFilter(handler, e, "EventType");
-        }
-
-        private void listFilterMonitor_ListChanged(object sender, ListChangedEventArgs e)
-        {
-            CustomBindingList<string> handler = (CustomBindingList<string>)sender;
-            HandleFilter(handler, e, "Monitor");
-        }
-
-        private void listFilterGCID_ListChanged(object sender, ListChangedEventArgs e)
-        {
-            CustomBindingList<string> handler = (CustomBindingList<string>)sender;
-            HandleFilter(handler, e, "GCID");
-        }
 
         private void listNode_ListChanged(object sender, ListChangedEventArgs e)
         {
@@ -434,6 +407,21 @@ namespace CSMDevHelper
         {
             tsslEvents.Text = String.Format("Event count = {0}, Filtered event count = {1}",
                 this.listNode.Count, this.listFilterNode.Count);
+        }
+
+
+        private static void FireEvent(Object targetObject, string eventName, EventArgs e)
+        {
+            String methodName = "On" + eventName;
+
+            MethodInfo mi = targetObject.GetType().GetMethod(
+                  methodName,
+                  BindingFlags.Instance | BindingFlags.NonPublic);
+
+            if (mi == null)
+                throw new ArgumentException("Cannot find event thrower named " + methodName);
+
+            mi.Invoke(targetObject, new object[] { e });
         }
     }
 }
