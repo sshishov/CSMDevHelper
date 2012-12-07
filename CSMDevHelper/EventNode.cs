@@ -127,6 +127,7 @@ namespace CSMDevHelper
         {
             this.eventInfo = new EventInfo();
             this.filterCount = 0;
+            object outObject;
             Match regMatch;
 
             this.eventInfo.TimeStamp = timestamp;
@@ -141,37 +142,49 @@ namespace CSMDevHelper
                 // Workaround for old versions (DropEvent w/o comma)
                 jsonString = jsonString.Replace(@"false""", @"false,""");
                 // Workaround for hex integers
-                //jsonString = new Regex(@"(?=\s\w+,)").Replace(jsonString, "$2");
+                jsonString = Regex.Replace(jsonString, @"(?<=\s)(\w+)(?=,)", "\"$1\"");
                 //Console.WriteLine("JSON = ***" + jsonString + "***");
                 JavaScriptSerializer mySer = new JavaScriptSerializer();
                 this.jsonDict = mySer.Deserialize<Dictionary<string, object>>(jsonString);
+                this.jsonDict = (Dictionary<string, object>)jsonDict["MitaiEvent"];
+                this.Nodes.AddRange(GenerateTree(this.jsonDict));
+                if (this.jsonDict.TryGetValue("Type", out outObject))
+                {
+                    regMatch = Regex.Match((string)this.jsonDict["Type"], @"^(?<TYPE>\D+)\((?<TYPENUM>\d+)\)");
+                    if (regMatch.Success)
+                    {
+                        this.eventInfo.Type = regMatch.Groups["TYPE"].Value;
+                        this.eventInfo.TypeNumber = regMatch.Groups["TYPENUM"].Value;
+                    }
+                }
+                if (this.jsonDict.TryGetValue("Cause", out outObject))
+                {
+                    regMatch = Regex.Match((string)outObject, @"^(?<CAUSE>\D+)\((?<CAUSENUM>\d+)\)");
+                    if (regMatch.Success)
+                    {
+                        this.eventInfo.Cause = regMatch.Groups["CAUSE"].Value;
+                        this.eventInfo.CauseNumber = regMatch.Groups["CAUSENUM"].Value;
+                    }
+                }
             }
             catch (ArgumentException ex)
             {
-                MessageBox.Show("EXCEPTION: " + ex.Message);
+                this.eventInfo.Type = "Exception";
+                this.eventInfo.Cause = "Invalid JSON";
+                this.Nodes.Add(String.Format("Exception: {0}", ex.Message));
+                this.Nodes.Add(String.Format("JSON: {0}", jsonString));
                 return;
             }
-
-
-            this.jsonDict = (Dictionary<string, object>)jsonDict["MitaiEvent"];
-            object outObject;
-            if (this.jsonDict.TryGetValue("Type", out outObject))
+            finally
             {
-                regMatch = Regex.Match((string)this.jsonDict["Type"], @"^(?<TYPE>\D+)\((?<TYPENUM>\d+)\)");
-                if (regMatch.Success)
-                {
-                    this.eventInfo.Type = regMatch.Groups["TYPE"].Value;
-                    this.eventInfo.TypeNumber = regMatch.Groups["TYPENUM"].Value;
-                }
-            }
-            if (this.jsonDict.TryGetValue("Cause", out outObject))
-            {
-                regMatch = Regex.Match((string)outObject, @"^(?<CAUSE>\D+)\((?<CAUSENUM>\d+)\)");
-                if (regMatch.Success)
-                {
-                    this.eventInfo.Cause = regMatch.Groups["CAUSE"].Value;
-                    this.eventInfo.CauseNumber = regMatch.Groups["CAUSENUM"].Value;
-                }
+
+                this.Name = this.eventInfo.Type;
+                this.Text = String.Format("{0,-25}: {1,-20} ({2,15})",
+                    this.eventInfo.Type, this.eventInfo.Cause,
+                    this.eventInfo.TimeStamp);
+                Color defaultColor;
+                EventNode.colorDict.TryGetValue(this.eventInfo.Type, out defaultColor);
+                this.ForeColor = defaultColor;
             }
             if (this.jsonDict.TryGetValue("MonitorHandle", out outObject))
             {
@@ -188,7 +201,6 @@ namespace CSMDevHelper
                     }
                 }
             }
-
             if (this.jsonDict.TryGetValue("CGCID", out outObject))
             {
                 this.eventInfo.CGCID = (string)outObject;
@@ -201,21 +213,10 @@ namespace CSMDevHelper
             {
                 this.eventInfo.SGCID = (string)outObject;
             }
-
-            this.Nodes.AddRange(GenerateTree(this.jsonDict));
-
-            this.Name = this.eventInfo.Type;
-            this.Text = String.Format("{0,-25}: {1,-20} ({2,15})",
-                this.eventInfo.Type, this.eventInfo.Cause,
-                this.eventInfo.TimeStamp);
             if (this.Parked)
             {
                 this.Text = String.Format("{0} <== Parked", this.Text);
             }
-
-            Color defaultColor;
-            EventNode.colorDict.TryGetValue(this.eventInfo.Type, out defaultColor);
-            this.ForeColor = defaultColor;
         }
 
         private TreeNode[] GenerateTree(Dictionary<string, object> dict)

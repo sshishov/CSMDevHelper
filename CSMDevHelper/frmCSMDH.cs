@@ -21,6 +21,7 @@ namespace CSMDevHelper
             InitializeComponent();
             this.isLogUpdate = false;
             this.rootNode = null;
+            this.toolTip = null;
             this.treeLog.Sorted = true;
             this.dictGCID = new Dictionary<string, HashSet<string>>();
 
@@ -56,11 +57,24 @@ namespace CSMDevHelper
         {
             listNode.Clear();
             listFilterNode.Clear();
+            tbEvent.Clear();
+            listEvent.Clear();
+            tbFilterEvent.Clear();
+            listFilterEvent.Clear();
+            tbMonitor.Clear();
             listMonitor.Clear();
+            tbFilterMonitor.Clear();
             listFilterMonitor.Clear();
+            tbGCID.Clear();
+            listGCID.Clear();
+            tbFilterGCID.Clear();
+            listFilterGCID.Clear();
 
             treeLog.Enabled = false;
-            tcLogFilters.Enabled = false;
+            tbMonitorPage.Enabled = false;
+            tbEventPage.Enabled = false;
+            tbGCIDPage.Enabled = false;
+            //tcLogFilters.Enabled = false;
 
             btnLogStart.Enabled = false;
             btnLogStop.Enabled = true;
@@ -80,7 +94,9 @@ namespace CSMDevHelper
         private void btnLogStop_Click(object sender, EventArgs e)
         {
             treeLog.Enabled = true;
-            tcLogFilters.Enabled = true;
+            tbMonitorPage.Enabled = true;
+            tbEventPage.Enabled = true;
+            tbGCIDPage.Enabled = true;
 
             this.isLogUpdate = false;
             //this.logThread.Join();
@@ -114,8 +130,8 @@ namespace CSMDevHelper
         {
             LogResult update;
             //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
-            //LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
-            LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
+            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            //LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
             while(this.isLogUpdate)
             {
                 update = logReader.Process();
@@ -214,14 +230,21 @@ namespace CSMDevHelper
 
         private void TextboxUpdate(object sender, EventArgs e, ListBox lb, TextBox tb, BindingList<string> lst)
         {
-            IEnumerable<string> filtered = lst.Where((i) => i.IndexOf(tb.Text, StringComparison.OrdinalIgnoreCase) >= 0);
-            if (filtered.Count<string>() != 0)
+            if (tb.Text != String.Empty)
             {
-                lb.DataSource = new BindingSource(filtered, "");
+                IEnumerable<string> filtered = lst.Where((i) => i.IndexOf(tb.Text, StringComparison.OrdinalIgnoreCase) >= 0);
+                if (filtered.Count<string>() != 0)
+                {
+                    lb.DataSource = new BindingSource(filtered, "");
+                }
+                else
+                {
+                    lb.DataSource = null;
+                }
             }
             else
             {
-                lb.DataSource = null;
+                lb.DataSource = lst;
             }
         }
 
@@ -422,6 +445,56 @@ namespace CSMDevHelper
                 throw new ArgumentException("Cannot find event thrower named " + methodName);
 
             mi.Invoke(targetObject, new object[] { e });
+        }
+
+        private void treeLog_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (toolTip == null)
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    TreeNode node = treeLog.GetNodeAt(e.X, e.Y);
+                    if (node != null && node.Parent == null)
+                    {
+                        EventNode evnode = (EventNode)node;
+                        string toolTipHeader = String.Format("Event: {0}\n\rMonitor: {1}",
+                            evnode.eventInfo.Type, evnode.eventInfo.MonitorHandlerExtension);
+                        if (evnode.eventInfo.CGCID != default(string))
+                        {
+                            toolTipHeader += "\n\rCGCID = " + evnode.eventInfo.CGCID;
+                        }
+                        if (evnode.eventInfo.PGCID != default(string))
+                        {
+                            toolTipHeader += "\nPGCID = " + evnode.eventInfo.PGCID;
+                        }
+                        if (evnode.eventInfo.SGCID != default(string))
+                        {
+                            toolTipHeader += "\nSGCID = " + evnode.eventInfo.SGCID;
+                        }
+
+                        toolTip = new ToolTip();
+                        toolTip.ToolTipTitle = String.Format("event))) {0} event", evnode.ToolTipText);
+                        toolTip.UseAnimation = false;
+                        toolTip.UseFading = false;
+                        toolTip.Show(evnode.ToolTipText, (IWin32Window)sender, e.X, e.Y);
+                        treeLog.SelectedNode = evnode;
+                    }
+                }
+            }
+            else
+            {
+                toolTip.Hide(treeLog);
+                toolTip = null;
+            }
+        }
+
+        private void treeLog_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (toolTip != null)
+            {
+                toolTip.Hide(treeLog);
+                toolTip = null;
+            }
         }
     }
 }

@@ -35,10 +35,13 @@ namespace CSMDevHelper
         {
             this.tcCSMDH = new System.Windows.Forms.TabControl();
             this.tbLogPage = new System.Windows.Forms.TabPage();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.btnLogStop = new System.Windows.Forms.Button();
             this.ssEvents = new System.Windows.Forms.StatusStrip();
             this.tsslEvents = new System.Windows.Forms.ToolStripStatusLabel();
             this.tcLogFilters = new System.Windows.Forms.TabControl();
-            this.tbEventFilterPage = new System.Windows.Forms.TabPage();
+            this.tbEventPage = new System.Windows.Forms.TabPage();
+            this.tbFilterEvent = new System.Windows.Forms.TextBox();
             this.btnDelAllEvent = new System.Windows.Forms.Button();
             this.btnDelEvent = new System.Windows.Forms.Button();
             this.btnAddAllEvent = new System.Windows.Forms.Button();
@@ -46,7 +49,8 @@ namespace CSMDevHelper
             this.lbEvent = new System.Windows.Forms.ListBox();
             this.lbFilterEvent = new System.Windows.Forms.ListBox();
             this.tbEvent = new System.Windows.Forms.TextBox();
-            this.tbMonitorFilterPage = new System.Windows.Forms.TabPage();
+            this.tbMonitorPage = new System.Windows.Forms.TabPage();
+            this.tbFilterMonitor = new System.Windows.Forms.TextBox();
             this.btnDelAllMonitor = new System.Windows.Forms.Button();
             this.btnDelMonitor = new System.Windows.Forms.Button();
             this.btnAddAllMonitor = new System.Windows.Forms.Button();
@@ -55,6 +59,7 @@ namespace CSMDevHelper
             this.lbFilterMonitor = new System.Windows.Forms.ListBox();
             this.tbMonitor = new System.Windows.Forms.TextBox();
             this.tbGCIDPage = new System.Windows.Forms.TabPage();
+            this.tbFilterGCID = new System.Windows.Forms.TextBox();
             this.btnDelAllGCID = new System.Windows.Forms.Button();
             this.btnDelGCID = new System.Windows.Forms.Button();
             this.btnAddAllGCID = new System.Windows.Forms.Button();
@@ -62,20 +67,17 @@ namespace CSMDevHelper
             this.lbGCID = new System.Windows.Forms.ListBox();
             this.lbFilterGCID = new System.Windows.Forms.ListBox();
             this.tbGCID = new System.Windows.Forms.TextBox();
+            this.btnLogStart = new System.Windows.Forms.Button();
             this.btnLogPause = new System.Windows.Forms.Button();
             this.treeLog = new System.Windows.Forms.TreeView();
-            this.btnLogStop = new System.Windows.Forms.Button();
-            this.btnLogStart = new System.Windows.Forms.Button();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
-            this.tbFilterGCID = new System.Windows.Forms.TextBox();
-            this.tbFilterMonitor = new System.Windows.Forms.TextBox();
-            this.tbFilterEvent = new System.Windows.Forms.TextBox();
             this.tcCSMDH.SuspendLayout();
             this.tbLogPage.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.ssEvents.SuspendLayout();
             this.tcLogFilters.SuspendLayout();
-            this.tbEventFilterPage.SuspendLayout();
-            this.tbMonitorFilterPage.SuspendLayout();
+            this.tbEventPage.SuspendLayout();
+            this.tbMonitorPage.SuspendLayout();
             this.tbGCIDPage.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -83,35 +85,58 @@ namespace CSMDevHelper
             // 
             this.tcCSMDH.Controls.Add(this.tbLogPage);
             this.tcCSMDH.Controls.Add(this.tbGeneralPage);
-            this.tcCSMDH.Location = new System.Drawing.Point(13, 13);
+            this.tcCSMDH.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tcCSMDH.Location = new System.Drawing.Point(10, 10);
             this.tcCSMDH.Name = "tcCSMDH";
             this.tcCSMDH.SelectedIndex = 0;
-            this.tcCSMDH.Size = new System.Drawing.Size(1141, 502);
+            this.tcCSMDH.Size = new System.Drawing.Size(1212, 634);
             this.tcCSMDH.TabIndex = 0;
             // 
             // tbLogPage
             // 
-            this.tbLogPage.Controls.Add(this.ssEvents);
-            this.tbLogPage.Controls.Add(this.tcLogFilters);
-            this.tbLogPage.Controls.Add(this.btnLogPause);
+            this.tbLogPage.Controls.Add(this.panel1);
             this.tbLogPage.Controls.Add(this.treeLog);
-            this.tbLogPage.Controls.Add(this.btnLogStop);
-            this.tbLogPage.Controls.Add(this.btnLogStart);
             this.tbLogPage.Location = new System.Drawing.Point(4, 22);
             this.tbLogPage.Name = "tbLogPage";
-            this.tbLogPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbLogPage.Size = new System.Drawing.Size(1133, 476);
+            this.tbLogPage.Padding = new System.Windows.Forms.Padding(10);
+            this.tbLogPage.Size = new System.Drawing.Size(1204, 608);
             this.tbLogPage.TabIndex = 1;
             this.tbLogPage.Text = "Logging";
             this.tbLogPage.UseVisualStyleBackColor = true;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.btnLogStop);
+            this.panel1.Controls.Add(this.ssEvents);
+            this.panel1.Controls.Add(this.tcLogFilters);
+            this.panel1.Controls.Add(this.btnLogStart);
+            this.panel1.Controls.Add(this.btnLogPause);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel1.Location = new System.Drawing.Point(656, 10);
+            this.panel1.Name = "panel1";
+            this.panel1.Padding = new System.Windows.Forms.Padding(10);
+            this.panel1.Size = new System.Drawing.Size(538, 588);
+            this.panel1.TabIndex = 9;
+            // 
+            // btnLogStop
+            // 
+            this.btnLogStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLogStop.Enabled = false;
+            this.btnLogStop.Location = new System.Drawing.Point(347, 13);
+            this.btnLogStop.Name = "btnLogStop";
+            this.btnLogStop.Size = new System.Drawing.Size(88, 22);
+            this.btnLogStop.TabIndex = 3;
+            this.btnLogStop.Text = "Stop";
+            this.btnLogStop.UseVisualStyleBackColor = true;
+            this.btnLogStop.Click += new System.EventHandler(this.btnLogStop_Click);
             // 
             // ssEvents
             // 
             this.ssEvents.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsslEvents});
-            this.ssEvents.Location = new System.Drawing.Point(3, 451);
+            this.ssEvents.Location = new System.Drawing.Point(10, 556);
             this.ssEvents.Name = "ssEvents";
-            this.ssEvents.Size = new System.Drawing.Size(1127, 22);
+            this.ssEvents.Size = new System.Drawing.Size(518, 22);
             this.ssEvents.TabIndex = 8;
             this.ssEvents.Text = "statusStrip1";
             // 
@@ -122,38 +147,48 @@ namespace CSMDevHelper
             // 
             // tcLogFilters
             // 
-            this.tcLogFilters.Controls.Add(this.tbEventFilterPage);
-            this.tcLogFilters.Controls.Add(this.tbMonitorFilterPage);
+            this.tcLogFilters.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tcLogFilters.Controls.Add(this.tbEventPage);
+            this.tcLogFilters.Controls.Add(this.tbMonitorPage);
             this.tcLogFilters.Controls.Add(this.tbGCIDPage);
-            this.tcLogFilters.Location = new System.Drawing.Point(665, 35);
+            this.tcLogFilters.Location = new System.Drawing.Point(13, 51);
             this.tcLogFilters.Name = "tcLogFilters";
             this.tcLogFilters.SelectedIndex = 0;
-            this.tcLogFilters.Size = new System.Drawing.Size(462, 413);
+            this.tcLogFilters.Size = new System.Drawing.Size(512, 502);
             this.tcLogFilters.TabIndex = 7;
             // 
-            // tbEventFilterPage
+            // tbEventPage
             // 
-            this.tbEventFilterPage.Controls.Add(this.tbFilterEvent);
-            this.tbEventFilterPage.Controls.Add(this.btnDelAllEvent);
-            this.tbEventFilterPage.Controls.Add(this.btnDelEvent);
-            this.tbEventFilterPage.Controls.Add(this.btnAddAllEvent);
-            this.tbEventFilterPage.Controls.Add(this.btnAddEvent);
-            this.tbEventFilterPage.Controls.Add(this.lbEvent);
-            this.tbEventFilterPage.Controls.Add(this.lbFilterEvent);
-            this.tbEventFilterPage.Controls.Add(this.tbEvent);
-            this.tbEventFilterPage.Location = new System.Drawing.Point(4, 22);
-            this.tbEventFilterPage.Name = "tbEventFilterPage";
-            this.tbEventFilterPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbEventFilterPage.Size = new System.Drawing.Size(454, 387);
-            this.tbEventFilterPage.TabIndex = 0;
-            this.tbEventFilterPage.Text = "Event";
-            this.tbEventFilterPage.UseVisualStyleBackColor = true;
+            this.tbEventPage.Controls.Add(this.tbFilterEvent);
+            this.tbEventPage.Controls.Add(this.btnDelAllEvent);
+            this.tbEventPage.Controls.Add(this.btnDelEvent);
+            this.tbEventPage.Controls.Add(this.btnAddAllEvent);
+            this.tbEventPage.Controls.Add(this.btnAddEvent);
+            this.tbEventPage.Controls.Add(this.lbEvent);
+            this.tbEventPage.Controls.Add(this.lbFilterEvent);
+            this.tbEventPage.Controls.Add(this.tbEvent);
+            this.tbEventPage.Location = new System.Drawing.Point(4, 22);
+            this.tbEventPage.Name = "tbEventPage";
+            this.tbEventPage.Padding = new System.Windows.Forms.Padding(10);
+            this.tbEventPage.Size = new System.Drawing.Size(504, 476);
+            this.tbEventPage.TabIndex = 0;
+            this.tbEventPage.Text = "Event";
+            this.tbEventPage.UseVisualStyleBackColor = true;
+            // 
+            // tbFilterEvent
+            // 
+            this.tbFilterEvent.Location = new System.Drawing.Point(281, 13);
+            this.tbFilterEvent.Name = "tbFilterEvent";
+            this.tbFilterEvent.Size = new System.Drawing.Size(210, 20);
+            this.tbFilterEvent.TabIndex = 22;
+            this.tbFilterEvent.TextChanged += new System.EventHandler(this.tbFilterEvent_TextChanged);
             // 
             // btnDelAllEvent
             // 
-            this.btnDelAllEvent.Location = new System.Drawing.Point(211, 255);
+            this.btnDelAllEvent.Location = new System.Drawing.Point(229, 308);
             this.btnDelAllEvent.Name = "btnDelAllEvent";
-            this.btnDelAllEvent.Size = new System.Drawing.Size(32, 32);
+            this.btnDelAllEvent.Size = new System.Drawing.Size(46, 60);
             this.btnDelAllEvent.TabIndex = 21;
             this.btnDelAllEvent.Text = "<<";
             this.btnDelAllEvent.UseVisualStyleBackColor = true;
@@ -161,9 +196,9 @@ namespace CSMDevHelper
             // 
             // btnDelEvent
             // 
-            this.btnDelEvent.Location = new System.Drawing.Point(211, 217);
+            this.btnDelEvent.Location = new System.Drawing.Point(229, 242);
             this.btnDelEvent.Name = "btnDelEvent";
-            this.btnDelEvent.Size = new System.Drawing.Size(32, 32);
+            this.btnDelEvent.Size = new System.Drawing.Size(46, 60);
             this.btnDelEvent.TabIndex = 20;
             this.btnDelEvent.Text = "<";
             this.btnDelEvent.UseVisualStyleBackColor = true;
@@ -171,9 +206,9 @@ namespace CSMDevHelper
             // 
             // btnAddAllEvent
             // 
-            this.btnAddAllEvent.Location = new System.Drawing.Point(211, 134);
+            this.btnAddAllEvent.Location = new System.Drawing.Point(229, 176);
             this.btnAddAllEvent.Name = "btnAddAllEvent";
-            this.btnAddAllEvent.Size = new System.Drawing.Size(32, 32);
+            this.btnAddAllEvent.Size = new System.Drawing.Size(46, 60);
             this.btnAddAllEvent.TabIndex = 19;
             this.btnAddAllEvent.Text = ">>";
             this.btnAddAllEvent.UseVisualStyleBackColor = true;
@@ -181,9 +216,9 @@ namespace CSMDevHelper
             // 
             // btnAddEvent
             // 
-            this.btnAddEvent.Location = new System.Drawing.Point(211, 96);
+            this.btnAddEvent.Location = new System.Drawing.Point(229, 110);
             this.btnAddEvent.Name = "btnAddEvent";
-            this.btnAddEvent.Size = new System.Drawing.Size(32, 32);
+            this.btnAddEvent.Size = new System.Drawing.Size(46, 60);
             this.btnAddEvent.TabIndex = 18;
             this.btnAddEvent.Text = ">";
             this.btnAddEvent.UseVisualStyleBackColor = true;
@@ -191,47 +226,59 @@ namespace CSMDevHelper
             // 
             // lbEvent
             // 
+            this.lbEvent.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.lbEvent.FormattingEnabled = true;
-            this.lbEvent.Location = new System.Drawing.Point(2, 35);
+            this.lbEvent.Location = new System.Drawing.Point(13, 39);
             this.lbEvent.Name = "lbEvent";
             this.lbEvent.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbEvent.Size = new System.Drawing.Size(203, 342);
+            this.lbEvent.Size = new System.Drawing.Size(210, 420);
             this.lbEvent.TabIndex = 17;
             // 
             // lbFilterEvent
             // 
+            this.lbFilterEvent.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbFilterEvent.FormattingEnabled = true;
-            this.lbFilterEvent.Location = new System.Drawing.Point(249, 35);
+            this.lbFilterEvent.Location = new System.Drawing.Point(281, 39);
             this.lbFilterEvent.Name = "lbFilterEvent";
             this.lbFilterEvent.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbFilterEvent.Size = new System.Drawing.Size(203, 342);
+            this.lbFilterEvent.Size = new System.Drawing.Size(210, 420);
             this.lbFilterEvent.TabIndex = 16;
             // 
             // tbEvent
             // 
-            this.tbEvent.Location = new System.Drawing.Point(2, 9);
+            this.tbEvent.Location = new System.Drawing.Point(13, 13);
             this.tbEvent.Name = "tbEvent";
-            this.tbEvent.Size = new System.Drawing.Size(203, 20);
+            this.tbEvent.Size = new System.Drawing.Size(210, 20);
             this.tbEvent.TabIndex = 15;
             this.tbEvent.TextChanged += new System.EventHandler(this.tbEvent_TextChanged);
             // 
-            // tbMonitorFilterPage
+            // tbMonitorPage
             // 
-            this.tbMonitorFilterPage.Controls.Add(this.tbFilterMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.btnDelAllMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.btnDelMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.btnAddAllMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.btnAddMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.lbMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.lbFilterMonitor);
-            this.tbMonitorFilterPage.Controls.Add(this.tbMonitor);
-            this.tbMonitorFilterPage.Location = new System.Drawing.Point(4, 22);
-            this.tbMonitorFilterPage.Name = "tbMonitorFilterPage";
-            this.tbMonitorFilterPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbMonitorFilterPage.Size = new System.Drawing.Size(454, 387);
-            this.tbMonitorFilterPage.TabIndex = 1;
-            this.tbMonitorFilterPage.Text = "Monitor";
-            this.tbMonitorFilterPage.UseVisualStyleBackColor = true;
+            this.tbMonitorPage.Controls.Add(this.tbFilterMonitor);
+            this.tbMonitorPage.Controls.Add(this.btnDelAllMonitor);
+            this.tbMonitorPage.Controls.Add(this.btnDelMonitor);
+            this.tbMonitorPage.Controls.Add(this.btnAddAllMonitor);
+            this.tbMonitorPage.Controls.Add(this.btnAddMonitor);
+            this.tbMonitorPage.Controls.Add(this.lbMonitor);
+            this.tbMonitorPage.Controls.Add(this.lbFilterMonitor);
+            this.tbMonitorPage.Controls.Add(this.tbMonitor);
+            this.tbMonitorPage.Location = new System.Drawing.Point(4, 22);
+            this.tbMonitorPage.Name = "tbMonitorPage";
+            this.tbMonitorPage.Padding = new System.Windows.Forms.Padding(3);
+            this.tbMonitorPage.Size = new System.Drawing.Size(504, 476);
+            this.tbMonitorPage.TabIndex = 1;
+            this.tbMonitorPage.Text = "Monitor";
+            this.tbMonitorPage.UseVisualStyleBackColor = true;
+            // 
+            // tbFilterMonitor
+            // 
+            this.tbFilterMonitor.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterMonitor.Name = "tbFilterMonitor";
+            this.tbFilterMonitor.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterMonitor.TabIndex = 22;
+            this.tbFilterMonitor.TextChanged += new System.EventHandler(this.tbFilterMonitor_TextChanged);
             // 
             // btnDelAllMonitor
             // 
@@ -313,10 +360,18 @@ namespace CSMDevHelper
             this.tbGCIDPage.Controls.Add(this.tbGCID);
             this.tbGCIDPage.Location = new System.Drawing.Point(4, 22);
             this.tbGCIDPage.Name = "tbGCIDPage";
-            this.tbGCIDPage.Size = new System.Drawing.Size(454, 387);
+            this.tbGCIDPage.Size = new System.Drawing.Size(504, 476);
             this.tbGCIDPage.TabIndex = 2;
             this.tbGCIDPage.Text = "GCID";
             this.tbGCIDPage.UseVisualStyleBackColor = true;
+            // 
+            // tbFilterGCID
+            // 
+            this.tbFilterGCID.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterGCID.Name = "tbFilterGCID";
+            this.tbFilterGCID.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterGCID.TabIndex = 29;
+            this.tbFilterGCID.TextChanged += new System.EventHandler(this.tbFilterGCID_TextChanged);
             // 
             // btnDelAllGCID
             // 
@@ -385,10 +440,22 @@ namespace CSMDevHelper
             this.tbGCID.TabIndex = 22;
             this.tbGCID.TextChanged += new System.EventHandler(this.tbGCID_TextChanged);
             // 
+            // btnLogStart
+            // 
+            this.btnLogStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLogStart.Location = new System.Drawing.Point(251, 13);
+            this.btnLogStart.Name = "btnLogStart";
+            this.btnLogStart.Size = new System.Drawing.Size(90, 22);
+            this.btnLogStart.TabIndex = 1;
+            this.btnLogStart.Text = "Start";
+            this.btnLogStart.UseVisualStyleBackColor = true;
+            this.btnLogStart.Click += new System.EventHandler(this.btnLogStart_Click);
+            // 
             // btnLogPause
             // 
+            this.btnLogPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLogPause.Enabled = false;
-            this.btnLogPause.Location = new System.Drawing.Point(1043, 6);
+            this.btnLogPause.Location = new System.Drawing.Point(441, 13);
             this.btnLogPause.Name = "btnLogPause";
             this.btnLogPause.Size = new System.Drawing.Size(84, 22);
             this.btnLogPause.TabIndex = 6;
@@ -398,87 +465,47 @@ namespace CSMDevHelper
             // 
             // treeLog
             // 
+            this.treeLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.treeLog.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.treeLog.Location = new System.Drawing.Point(3, 6);
+            this.treeLog.Location = new System.Drawing.Point(10, 10);
             this.treeLog.Name = "treeLog";
-            this.treeLog.ShowNodeToolTips = true;
-            this.treeLog.ShowRootLines = false;
-            this.treeLog.Size = new System.Drawing.Size(646, 442);
+            this.treeLog.Size = new System.Drawing.Size(640, 588);
             this.treeLog.TabIndex = 4;
-            // 
-            // btnLogStop
-            // 
-            this.btnLogStop.Enabled = false;
-            this.btnLogStop.Location = new System.Drawing.Point(949, 7);
-            this.btnLogStop.Name = "btnLogStop";
-            this.btnLogStop.Size = new System.Drawing.Size(88, 22);
-            this.btnLogStop.TabIndex = 3;
-            this.btnLogStop.Text = "Stop";
-            this.btnLogStop.UseVisualStyleBackColor = true;
-            this.btnLogStop.Click += new System.EventHandler(this.btnLogStop_Click);
-            // 
-            // btnLogStart
-            // 
-            this.btnLogStart.Location = new System.Drawing.Point(853, 6);
-            this.btnLogStart.Name = "btnLogStart";
-            this.btnLogStart.Size = new System.Drawing.Size(90, 22);
-            this.btnLogStart.TabIndex = 1;
-            this.btnLogStart.Text = "Start";
-            this.btnLogStart.UseVisualStyleBackColor = true;
-            this.btnLogStart.Click += new System.EventHandler(this.btnLogStart_Click);
+            this.treeLog.KeyDown += new System.Windows.Forms.KeyEventHandler(this.treeLog_KeyDown);
+            this.treeLog.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeLog_MouseDown);
             // 
             // tbGeneralPage
             // 
             this.tbGeneralPage.Location = new System.Drawing.Point(4, 22);
             this.tbGeneralPage.Name = "tbGeneralPage";
             this.tbGeneralPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbGeneralPage.Size = new System.Drawing.Size(1133, 476);
+            this.tbGeneralPage.Size = new System.Drawing.Size(1204, 608);
             this.tbGeneralPage.TabIndex = 0;
             this.tbGeneralPage.Text = "General";
             this.tbGeneralPage.UseVisualStyleBackColor = true;
-            // 
-            // tbFilterGCID
-            // 
-            this.tbFilterGCID.Location = new System.Drawing.Point(249, 9);
-            this.tbFilterGCID.Name = "tbFilterGCID";
-            this.tbFilterGCID.Size = new System.Drawing.Size(203, 20);
-            this.tbFilterGCID.TabIndex = 29;
-            this.tbFilterGCID.TextChanged += new System.EventHandler(this.tbFilterGCID_TextChanged);
-            // 
-            // tbFilterMonitor
-            // 
-            this.tbFilterMonitor.Location = new System.Drawing.Point(249, 9);
-            this.tbFilterMonitor.Name = "tbFilterMonitor";
-            this.tbFilterMonitor.Size = new System.Drawing.Size(203, 20);
-            this.tbFilterMonitor.TabIndex = 22;
-            this.tbFilterMonitor.TextChanged += new System.EventHandler(this.tbFilterMonitor_TextChanged);
-            // 
-            // tbFilterEvent
-            // 
-            this.tbFilterEvent.Location = new System.Drawing.Point(249, 9);
-            this.tbFilterEvent.Name = "tbFilterEvent";
-            this.tbFilterEvent.Size = new System.Drawing.Size(203, 20);
-            this.tbFilterEvent.TabIndex = 22;
-            this.tbFilterEvent.TextChanged += new System.EventHandler(this.tbFilterEvent_TextChanged);
             // 
             // frmCSMDH
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1166, 527);
+            this.ClientSize = new System.Drawing.Size(1232, 654);
             this.Controls.Add(this.tcCSMDH);
             this.Name = "frmCSMDH";
+            this.Padding = new System.Windows.Forms.Padding(10);
             this.Text = "CSM Development Helper";
             this.tcCSMDH.ResumeLayout(false);
             this.tbLogPage.ResumeLayout(false);
-            this.tbLogPage.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ssEvents.ResumeLayout(false);
             this.ssEvents.PerformLayout();
             this.tcLogFilters.ResumeLayout(false);
-            this.tbEventFilterPage.ResumeLayout(false);
-            this.tbEventFilterPage.PerformLayout();
-            this.tbMonitorFilterPage.ResumeLayout(false);
-            this.tbMonitorFilterPage.PerformLayout();
+            this.tbEventPage.ResumeLayout(false);
+            this.tbEventPage.PerformLayout();
+            this.tbMonitorPage.ResumeLayout(false);
+            this.tbMonitorPage.PerformLayout();
             this.tbGCIDPage.ResumeLayout(false);
             this.tbGCIDPage.PerformLayout();
             this.ResumeLayout(false);
@@ -490,16 +517,9 @@ namespace CSMDevHelper
         private System.Windows.Forms.TabControl tcCSMDH;
         private System.Windows.Forms.TabPage tbGeneralPage;
         private System.Windows.Forms.TabPage tbLogPage;
-        private System.Windows.Forms.Button btnLogStart;
-        private System.Windows.Forms.Button btnLogStop;
         private System.Windows.Forms.TreeView treeLog;
 
         private System.Threading.Thread logThread;
-        private System.Windows.Forms.Button btnLogPause;
-        private System.Windows.Forms.TabControl tcLogFilters;
-        private System.Windows.Forms.TabPage tbEventFilterPage;
-        private System.Windows.Forms.TabPage tbMonitorFilterPage;
-        private System.Windows.Forms.TabPage tbGCIDPage;
         private System.Windows.Forms.StatusStrip ssEvents;
         private System.Windows.Forms.ToolStripStatusLabel tsslEvents;
 
@@ -514,7 +534,13 @@ namespace CSMDevHelper
         private CustomBindingList<string> listFilterEvent;
         private CustomBindingList<EventNode> listNode;
         private CustomBindingList<EventNode> listFilterNode;
-
+        private ToolTip toolTip;
+        private Panel panel1;
+        private Button btnLogStop;
+        private Button btnLogStart;
+        private TabControl tcLogFilters;
+        private TabPage tbEventPage;
+        private TextBox tbFilterEvent;
         private Button btnDelAllEvent;
         private Button btnDelEvent;
         private Button btnAddAllEvent;
@@ -522,6 +548,8 @@ namespace CSMDevHelper
         private ListBox lbEvent;
         private ListBox lbFilterEvent;
         private TextBox tbEvent;
+        private TabPage tbMonitorPage;
+        private TextBox tbFilterMonitor;
         private Button btnDelAllMonitor;
         private Button btnDelMonitor;
         private Button btnAddAllMonitor;
@@ -529,6 +557,8 @@ namespace CSMDevHelper
         private ListBox lbMonitor;
         private ListBox lbFilterMonitor;
         private TextBox tbMonitor;
+        private TabPage tbGCIDPage;
+        private TextBox tbFilterGCID;
         private Button btnDelAllGCID;
         private Button btnDelGCID;
         private Button btnAddAllGCID;
@@ -536,9 +566,7 @@ namespace CSMDevHelper
         private ListBox lbGCID;
         private ListBox lbFilterGCID;
         private TextBox tbGCID;
-        private TextBox tbFilterGCID;
-        private TextBox tbFilterEvent;
-        private TextBox tbFilterMonitor;
+        private Button btnLogPause;
     }
 }
 
