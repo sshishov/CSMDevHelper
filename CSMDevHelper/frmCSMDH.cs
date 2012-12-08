@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
-using System.Web.Script.Serialization;
 using System.Reflection;
 
 namespace CSMDevHelper
@@ -46,9 +45,9 @@ namespace CSMDevHelper
             this.lbFilterEvent.DataSource = this.listFilterEvent;
             this.listFilterEvent.ListChanged += new ListChangedEventHandler(listFilterEvent_ListChanged);
 
-            this.listNode = new CustomBindingList<EventNode>();
+            this.listNode = new CustomBindingList<TreeNode>();
             this.listNode.ListChanged += new ListChangedEventHandler(listNode_ListChanged);
-            this.listFilterNode = new CustomBindingList<EventNode>();
+            this.listFilterNode = new CustomBindingList<TreeNode>();
             this.listFilterNode.ListChanged += new ListChangedEventHandler(listFilterNode_ListChanged);
             
         }
@@ -128,14 +127,15 @@ namespace CSMDevHelper
 
         void ThreadLogUpdate()
         {
-            LogResult update;
+            LogResult logResult;
             //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
-            LogReader logReader = new LogReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            LogReader logReader = new LogCPReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
+            //LogReader logReader = new LogMCDReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
             //LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
             while(this.isLogUpdate)
             {
-                update = logReader.Process();
-                Invoke(this.myDelegate, update);
+                logResult = logReader.Process();
+                Invoke(this.myDelegate, logResult);
             }
         }
 
@@ -143,50 +143,50 @@ namespace CSMDevHelper
         {
             if (this.isLogUpdate)
             {
+                CSMEvent tag;
                 switch (logResult.code)
                 {
-                    case LogCode.LOG_MITAI:
-                        this.rootNode = new EventNode(logResult.result, logResult.timestamp);
+                    case LogCode.LOG_EVENT:
+                        rootNode = new TreeNode();
+                        rootNode.Tag = logResult.result;
+                        tag = (CSMEvent)this.rootNode.Tag;
+                        rootNode.Nodes.AddRange(tag.node);
                         // Updating Event checklist
-                        if (!lbEvent.Items.Contains(this.rootNode.eventInfo.Type))
+                        if (!lbEvent.Items.Contains(tag.eventInfo.Type))
                         {
-                            this.listEvent.Add(this.rootNode.eventInfo.Type);
+                            this.listEvent.Add(tag.eventInfo.Type);
                         }
                         // Updating Monitor checklist
-                        if (!listMonitor.Contains(this.rootNode.Monitor))
+                        if (!listMonitor.Contains(tag.Monitor))
                         {
-                            listMonitor.Add(this.rootNode.Monitor);
+                            listMonitor.Add(tag.Monitor);
                         }
                         //Updating GCID checklist
-                        foreach (string gcid in this.rootNode.GCID)
+                        foreach (string gcid in tag.GCID)
                         {
                             if (this.dictGCID.ContainsKey(gcid))
                             {
-                                this.dictGCID[gcid].Union(this.rootNode.GCID);
+                                this.dictGCID[gcid].Union(tag.GCID);
                             }
                             else
                             {
-                                this.dictGCID[gcid] = this.rootNode.GCID;
+                                this.dictGCID[gcid] = tag.GCID;
                             }
                             if (!listGCID.Contains(gcid))
                             {
                                 listGCID.Add(gcid);
                             }
                         }
-                        this.rootNode.Text = String.Format("{0,4}> {1}", treeLog.Nodes.Count + 1, this.rootNode.Text);
+                        rootNode.Name = tag.eventInfo.Type;
+                        rootNode.Text = String.Format("{0,4}> {1,-25}: {2,-20} ({3,15})", treeLog.Nodes.Count + 1, tag.eventInfo.Type, tag.eventInfo.Cause, tag.eventInfo.TimeStamp);
+                        if (tag.Parked)
+                        {
+                            rootNode.Text = String.Format("{0} <== Parked", this.Text);
+                        }
+                        rootNode.ForeColor = tag.GetColor();
                         listNode.Add(rootNode);
                         break;
                     case LogCode.LOG_MODELING:
-                        if (this.rootNode.ToolTipText == String.Empty)
-                        {
-                            this.rootNode.eventInfo.Modeling += logResult.result;
-                            this.rootNode.ToolTipText += logResult.result;
-                        }
-                        else
-                        {
-                            this.rootNode.eventInfo.Modeling += Environment.NewLine + logResult.result;
-                            this.rootNode.ToolTipText += Environment.NewLine + logResult.result;
-                        }
                         this.rootNode.BackColor = Color.LightGoldenrodYellow;
                         break;
                     case LogCode.LOG_LEG:
@@ -354,22 +354,24 @@ namespace CSMDevHelper
 
         private void HandleFilter(CustomBindingList<string> sender, ListChangedEventArgs e, FilterComparator compareAttribute)
         {
+            CSMEvent tag;
             switch (e.ListChangedType)
             {
                 case ListChangedType.ItemAdded:
-                    foreach (EventNode node in listFilterNode)
+                    foreach (TreeNode node in listFilterNode)
                     {
-                        if (node.Compare(compareAttribute, sender[e.NewIndex]))
-                            node.filterCount += 1;
+                        tag = (CSMEvent)node.Tag;
+                        if (tag.Compare(compareAttribute, sender[e.NewIndex]))
+                            tag.filterCount += 1;
                     }
 
                     for (int index = listNode.Count - 1; index >= 0; index--)
                     {
-                        EventNode node = listNode[index];
-                        if (node.Compare(compareAttribute, sender[e.NewIndex]))
+                        tag = (CSMEvent)listNode[index].Tag;
+                        if (tag.Compare(compareAttribute, sender[e.NewIndex]))
                         {
-                            node.filterCount += 1;
-                            listFilterNode.Add(node);
+                            tag.filterCount += 1;
+                            listFilterNode.Add(listNode[index]);
                             listNode.RemoveAt(index);
                         }
                     }
@@ -377,11 +379,11 @@ namespace CSMDevHelper
                 case ListChangedType.ItemDeleted:
                     for (int index = listFilterNode.Count - 1; index >= 0; index--)
                     {
-                        EventNode node = listFilterNode[index];
-                        if (node.Compare(compareAttribute, sender.RemovedItem))
+                        tag = (CSMEvent)listFilterNode[index].Tag;
+                        if (tag.Compare(compareAttribute, sender.RemovedItem))
                         {
-                            node.filterCount -= 1;
-                            if (node.filterCount == 0)
+                            tag.filterCount -= 1;
+                            if (tag.filterCount == 0)
                             {
                                 listNode.Add(listFilterNode[index]);
                                 listFilterNode.RemoveAt(index);
@@ -390,7 +392,7 @@ namespace CSMDevHelper
                     }
                     break;
                 case ListChangedType.Reset:
-                    foreach (EventNode item in listFilterNode)
+                    foreach (TreeNode item in listFilterNode)
                     {
                         listNode.Add(item);
                     }
@@ -404,7 +406,7 @@ namespace CSMDevHelper
 
         private void listNode_ListChanged(object sender, ListChangedEventArgs e)
         {
-            CustomBindingList<EventNode> handler = (CustomBindingList<EventNode>)sender;
+            CustomBindingList<TreeNode> handler = (CustomBindingList<TreeNode>)sender;
             if (e.ListChangedType == ListChangedType.ItemAdded)
             {
                 treeLog.Nodes.Add(listNode[e.NewIndex]);
@@ -456,28 +458,27 @@ namespace CSMDevHelper
                     TreeNode node = treeLog.GetNodeAt(e.X, e.Y);
                     if (node != null && node.Parent == null)
                     {
-                        EventNode evnode = (EventNode)node;
-                        string toolTipHeader = String.Format("Event: {0}\n\rMonitor: {1}",
-                            evnode.eventInfo.Type, evnode.eventInfo.MonitorHandlerExtension);
-                        if (evnode.eventInfo.CGCID != default(string))
+                        CSMEvent tag = (CSMEvent)node.Tag;
+                        string msgToolTip = String.Format("{0:4}Monitor: {1}", String.Empty, tag.eventInfo.MonitorHandlerExtension);
+                        if (tag.eventInfo.CGCID != default(string))
                         {
-                            toolTipHeader += "\n\rCGCID = " + evnode.eventInfo.CGCID;
+                            msgToolTip += String.Format("{0}{1:4}CGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.CGCID);
                         }
-                        if (evnode.eventInfo.PGCID != default(string))
+                        if (tag.eventInfo.PGCID != default(string))
                         {
-                            toolTipHeader += "\nPGCID = " + evnode.eventInfo.PGCID;
+                            msgToolTip += String.Format("{0}{1:4}PGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.PGCID);
                         }
-                        if (evnode.eventInfo.SGCID != default(string))
+                        if (tag.eventInfo.SGCID != default(string))
                         {
-                            toolTipHeader += "\nSGCID = " + evnode.eventInfo.SGCID;
+                            msgToolTip += String.Format("{0}{1:4}SGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.SGCID);
                         }
-
+                        msgToolTip += String.Format("{0}{1}", Environment.NewLine, tag.eventInfo.Modeling);
                         toolTip = new ToolTip();
-                        toolTip.ToolTipTitle = String.Format("event))) {0} event", evnode.ToolTipText);
+                        toolTip.ToolTipTitle = String.Format("Event: {0}", tag.eventInfo.Type);
                         toolTip.UseAnimation = false;
                         toolTip.UseFading = false;
-                        toolTip.Show(evnode.ToolTipText, (IWin32Window)sender, e.X, e.Y);
-                        treeLog.SelectedNode = evnode;
+                        toolTip.Show(msgToolTip, (IWin32Window)sender, e.X, e.Y);
+                        treeLog.SelectedNode = node;
                     }
                 }
             }

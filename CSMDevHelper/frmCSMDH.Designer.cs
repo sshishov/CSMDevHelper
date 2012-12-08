@@ -524,7 +524,7 @@ namespace CSMDevHelper
         private System.Windows.Forms.ToolStripStatusLabel tsslEvents;
 
         private bool isLogUpdate;
-        private EventNode rootNode;
+        private TreeNode rootNode;
         private Dictionary<string, HashSet<string>> dictGCID;
         private CustomBindingList<string> listMonitor;
         private CustomBindingList<string> listGCID;
@@ -532,8 +532,8 @@ namespace CSMDevHelper
         private CustomBindingList<string> listFilterMonitor;
         private CustomBindingList<string> listFilterGCID;
         private CustomBindingList<string> listFilterEvent;
-        private CustomBindingList<EventNode> listNode;
-        private CustomBindingList<EventNode> listFilterNode;
+        private CustomBindingList<TreeNode> listNode;
+        private CustomBindingList<TreeNode> listFilterNode;
         private ToolTip toolTip;
         private Panel panel1;
         private Button btnLogStop;
