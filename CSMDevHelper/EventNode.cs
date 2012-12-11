@@ -56,7 +56,7 @@ namespace CSMDevHelper
     {
         internal EventInfo eventInfo;
         public int filterCount;
-        public TreeNode[] node;
+        public List<TreeNode> node;
 
         public bool hasModeling
         {
@@ -116,10 +116,25 @@ namespace CSMDevHelper
 
         static Dictionary<string, Color> colorDict = new Dictionary<string, Color>()
         {
-            {"CallOriginatedEvent" , Color.Blue},
-            {"CallDeliveredEvent" , Color.Red},
-            {"CallReceivedEvent" , Color.Green},
-            {"CallClearedEvent" , Color.Orange}
+            {"Service Initiated", Color.Goldenrod},
+            {"Network Reached", Color.Goldenrod},
+
+            {"CallOriginatedEvent" , Color.DarkBlue},
+            {"Originated" , Color.DarkBlue},
+
+            {"CallDeliveredEvent" , Color.LimeGreen},
+            {"Delivered" , Color.LimeGreen},
+            {"CallReceivedEvent" , Color.LimeGreen},
+
+            {"CallEstablishedEvent" , Color.Green},
+            {"Established" , Color.Green},
+            
+            {"CallDivertedEvent" , Color.DarkViolet},
+            {"Diverted" , Color.DarkViolet},
+
+            {"CallClearedEvent" , Color.Red},
+            {"Call Cleared" , Color.Red},
+            {"Connection Cleared" , Color.Red},
         };
 
         public CSMEvent()

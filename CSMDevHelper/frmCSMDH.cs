@@ -49,7 +49,8 @@ namespace CSMDevHelper
             this.listNode.ListChanged += new ListChangedEventHandler(listNode_ListChanged);
             this.listFilterNode = new CustomBindingList<TreeNode>();
             this.listFilterNode.ListChanged += new ListChangedEventHandler(listFilterNode_ListChanged);
-            
+
+            this.log_filename = @"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log";
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
@@ -73,7 +74,6 @@ namespace CSMDevHelper
             tbMonitorPage.Enabled = false;
             tbEventPage.Enabled = false;
             tbGCIDPage.Enabled = false;
-            //tcLogFilters.Enabled = false;
 
             btnLogStart.Enabled = false;
             btnLogStop.Enabled = true;
@@ -113,7 +113,9 @@ namespace CSMDevHelper
                 // Deprecated and should be changed to more convenience manner
                 logThread.Suspend();
                 treeLog.Enabled = true;
-                tcLogFilters.Enabled = true;
+                tbMonitorPage.Enabled = true;
+                tbEventPage.Enabled = true;
+                tbGCIDPage.Enabled = true;
             }
             else
             {
@@ -121,17 +123,30 @@ namespace CSMDevHelper
                 // Deprecated and should be changed to more convenience manner
                 logThread.Resume();
                 treeLog.Enabled = false;
-                tcLogFilters.Enabled = false;
+                tbMonitorPage.Enabled = false;
+                tbEventPage.Enabled = false;
+                tbGCIDPage.Enabled = false;
             }
         }
 
         void ThreadLogUpdate()
         {
             LogResult logResult;
-            //LogReader logReader = new LogReader(@"C:\GA_logs.txt", false);
-            LogReader logReader = new LogCPReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
-            //LogReader logReader = new LogMCDReader(@"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log", false);
-            //LogReader logReader = new LogReader(@"C:\ClearedTelDrv.txt", true);
+            LogReader logReader;
+
+            if (rbtnMCD.Checked)
+            {
+                logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
+            }
+            else if (rbtnCP.Checked)
+            {
+                logReader = new LogCPReader(log_filename, !chkTailing.Checked);
+            }
+            else
+            {
+                //TODO Fill this section
+                logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
+            }
             while(this.isLogUpdate)
             {
                 logResult = logReader.Process();
@@ -150,7 +165,7 @@ namespace CSMDevHelper
                         rootNode = new TreeNode();
                         rootNode.Tag = logResult.result;
                         tag = (CSMEvent)this.rootNode.Tag;
-                        rootNode.Nodes.AddRange(tag.node);
+                        rootNode.Nodes.AddRange(tag.node.ToArray());
                         // Updating Event checklist
                         if (!lbEvent.Items.Contains(tag.eventInfo.Type))
                         {
@@ -187,7 +202,7 @@ namespace CSMDevHelper
                         listNode.Add(rootNode);
                         break;
                     case LogCode.LOG_MODELING:
-                        this.rootNode.BackColor = Color.LightGoldenrodYellow;
+                        rootNode.BackColor = Color.Lavender;
                         break;
                     case LogCode.LOG_LEG:
                         break;
@@ -495,6 +510,17 @@ namespace CSMDevHelper
             {
                 toolTip.Hide(treeLog);
                 toolTip = null;
+            }
+        }
+
+        private void openLogFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Title = "Select LOG file";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                log_filename = dialog.FileName;
+                this.btnLogStop_Click(sender, e);
             }
         }
     }

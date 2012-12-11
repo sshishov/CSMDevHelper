@@ -71,6 +71,14 @@ namespace CSMDevHelper
             this.btnLogPause = new System.Windows.Forms.Button();
             this.treeLog = new System.Windows.Forms.TreeView();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.fIleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chkTailing = new System.Windows.Forms.CheckBox();
+            this.rbtnAuto = new System.Windows.Forms.RadioButton();
+            this.rbtnMCD = new System.Windows.Forms.RadioButton();
+            this.rbtnCP = new System.Windows.Forms.RadioButton();
+            this.panel2 = new System.Windows.Forms.Panel();
             this.tcCSMDH.SuspendLayout();
             this.tbLogPage.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -79,6 +87,8 @@ namespace CSMDevHelper
             this.tbEventPage.SuspendLayout();
             this.tbMonitorPage.SuspendLayout();
             this.tbGCIDPage.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcCSMDH
@@ -86,10 +96,10 @@ namespace CSMDevHelper
             this.tcCSMDH.Controls.Add(this.tbLogPage);
             this.tcCSMDH.Controls.Add(this.tbGeneralPage);
             this.tcCSMDH.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tcCSMDH.Location = new System.Drawing.Point(10, 10);
+            this.tcCSMDH.Location = new System.Drawing.Point(10, 34);
             this.tcCSMDH.Name = "tcCSMDH";
             this.tcCSMDH.SelectedIndex = 0;
-            this.tcCSMDH.Size = new System.Drawing.Size(1212, 634);
+            this.tcCSMDH.Size = new System.Drawing.Size(1212, 610);
             this.tcCSMDH.TabIndex = 0;
             // 
             // tbLogPage
@@ -99,13 +109,15 @@ namespace CSMDevHelper
             this.tbLogPage.Location = new System.Drawing.Point(4, 22);
             this.tbLogPage.Name = "tbLogPage";
             this.tbLogPage.Padding = new System.Windows.Forms.Padding(10);
-            this.tbLogPage.Size = new System.Drawing.Size(1204, 608);
+            this.tbLogPage.Size = new System.Drawing.Size(1204, 584);
             this.tbLogPage.TabIndex = 1;
             this.tbLogPage.Text = "Logging";
             this.tbLogPage.UseVisualStyleBackColor = true;
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.panel2);
+            this.panel1.Controls.Add(this.chkTailing);
             this.panel1.Controls.Add(this.btnLogStop);
             this.panel1.Controls.Add(this.ssEvents);
             this.panel1.Controls.Add(this.tcLogFilters);
@@ -115,16 +127,16 @@ namespace CSMDevHelper
             this.panel1.Location = new System.Drawing.Point(656, 10);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(10);
-            this.panel1.Size = new System.Drawing.Size(538, 588);
+            this.panel1.Size = new System.Drawing.Size(538, 564);
             this.panel1.TabIndex = 9;
             // 
             // btnLogStop
             // 
             this.btnLogStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLogStop.Enabled = false;
-            this.btnLogStop.Location = new System.Drawing.Point(347, 13);
+            this.btnLogStop.Location = new System.Drawing.Point(465, 13);
             this.btnLogStop.Name = "btnLogStop";
-            this.btnLogStop.Size = new System.Drawing.Size(88, 22);
+            this.btnLogStop.Size = new System.Drawing.Size(60, 22);
             this.btnLogStop.TabIndex = 3;
             this.btnLogStop.Text = "Stop";
             this.btnLogStop.UseVisualStyleBackColor = true;
@@ -134,7 +146,7 @@ namespace CSMDevHelper
             // 
             this.ssEvents.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsslEvents});
-            this.ssEvents.Location = new System.Drawing.Point(10, 556);
+            this.ssEvents.Location = new System.Drawing.Point(10, 532);
             this.ssEvents.Name = "ssEvents";
             this.ssEvents.Size = new System.Drawing.Size(518, 22);
             this.ssEvents.TabIndex = 8;
@@ -152,10 +164,10 @@ namespace CSMDevHelper
             this.tcLogFilters.Controls.Add(this.tbEventPage);
             this.tcLogFilters.Controls.Add(this.tbMonitorPage);
             this.tcLogFilters.Controls.Add(this.tbGCIDPage);
-            this.tcLogFilters.Location = new System.Drawing.Point(13, 51);
+            this.tcLogFilters.Location = new System.Drawing.Point(13, 41);
             this.tcLogFilters.Name = "tcLogFilters";
             this.tcLogFilters.SelectedIndex = 0;
-            this.tcLogFilters.Size = new System.Drawing.Size(512, 502);
+            this.tcLogFilters.Size = new System.Drawing.Size(512, 488);
             this.tcLogFilters.TabIndex = 7;
             // 
             // tbEventPage
@@ -171,7 +183,7 @@ namespace CSMDevHelper
             this.tbEventPage.Location = new System.Drawing.Point(4, 22);
             this.tbEventPage.Name = "tbEventPage";
             this.tbEventPage.Padding = new System.Windows.Forms.Padding(10);
-            this.tbEventPage.Size = new System.Drawing.Size(504, 476);
+            this.tbEventPage.Size = new System.Drawing.Size(504, 462);
             this.tbEventPage.TabIndex = 0;
             this.tbEventPage.Text = "Event";
             this.tbEventPage.UseVisualStyleBackColor = true;
@@ -232,7 +244,7 @@ namespace CSMDevHelper
             this.lbEvent.Location = new System.Drawing.Point(13, 39);
             this.lbEvent.Name = "lbEvent";
             this.lbEvent.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbEvent.Size = new System.Drawing.Size(210, 420);
+            this.lbEvent.Size = new System.Drawing.Size(210, 381);
             this.lbEvent.TabIndex = 17;
             // 
             // lbFilterEvent
@@ -243,7 +255,7 @@ namespace CSMDevHelper
             this.lbFilterEvent.Location = new System.Drawing.Point(281, 39);
             this.lbFilterEvent.Name = "lbFilterEvent";
             this.lbFilterEvent.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbFilterEvent.Size = new System.Drawing.Size(210, 420);
+            this.lbFilterEvent.Size = new System.Drawing.Size(210, 381);
             this.lbFilterEvent.TabIndex = 16;
             // 
             // tbEvent
@@ -267,7 +279,7 @@ namespace CSMDevHelper
             this.tbMonitorPage.Location = new System.Drawing.Point(4, 22);
             this.tbMonitorPage.Name = "tbMonitorPage";
             this.tbMonitorPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbMonitorPage.Size = new System.Drawing.Size(504, 476);
+            this.tbMonitorPage.Size = new System.Drawing.Size(504, 452);
             this.tbMonitorPage.TabIndex = 1;
             this.tbMonitorPage.Text = "Monitor";
             this.tbMonitorPage.UseVisualStyleBackColor = true;
@@ -360,7 +372,7 @@ namespace CSMDevHelper
             this.tbGCIDPage.Controls.Add(this.tbGCID);
             this.tbGCIDPage.Location = new System.Drawing.Point(4, 22);
             this.tbGCIDPage.Name = "tbGCIDPage";
-            this.tbGCIDPage.Size = new System.Drawing.Size(504, 476);
+            this.tbGCIDPage.Size = new System.Drawing.Size(504, 452);
             this.tbGCIDPage.TabIndex = 2;
             this.tbGCIDPage.Text = "GCID";
             this.tbGCIDPage.UseVisualStyleBackColor = true;
@@ -443,9 +455,9 @@ namespace CSMDevHelper
             // btnLogStart
             // 
             this.btnLogStart.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLogStart.Location = new System.Drawing.Point(251, 13);
+            this.btnLogStart.Location = new System.Drawing.Point(333, 13);
             this.btnLogStart.Name = "btnLogStart";
-            this.btnLogStart.Size = new System.Drawing.Size(90, 22);
+            this.btnLogStart.Size = new System.Drawing.Size(60, 22);
             this.btnLogStart.TabIndex = 1;
             this.btnLogStart.Text = "Start";
             this.btnLogStart.UseVisualStyleBackColor = true;
@@ -455,9 +467,9 @@ namespace CSMDevHelper
             // 
             this.btnLogPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLogPause.Enabled = false;
-            this.btnLogPause.Location = new System.Drawing.Point(441, 13);
+            this.btnLogPause.Location = new System.Drawing.Point(399, 13);
             this.btnLogPause.Name = "btnLogPause";
-            this.btnLogPause.Size = new System.Drawing.Size(84, 22);
+            this.btnLogPause.Size = new System.Drawing.Size(60, 22);
             this.btnLogPause.TabIndex = 6;
             this.btnLogPause.Text = "Pause";
             this.btnLogPause.UseVisualStyleBackColor = true;
@@ -471,7 +483,7 @@ namespace CSMDevHelper
             this.treeLog.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.treeLog.Location = new System.Drawing.Point(10, 10);
             this.treeLog.Name = "treeLog";
-            this.treeLog.Size = new System.Drawing.Size(640, 588);
+            this.treeLog.Size = new System.Drawing.Size(640, 564);
             this.treeLog.TabIndex = 4;
             this.treeLog.KeyDown += new System.Windows.Forms.KeyEventHandler(this.treeLog_KeyDown);
             this.treeLog.MouseDown += new System.Windows.Forms.MouseEventHandler(this.treeLog_MouseDown);
@@ -481,10 +493,89 @@ namespace CSMDevHelper
             this.tbGeneralPage.Location = new System.Drawing.Point(4, 22);
             this.tbGeneralPage.Name = "tbGeneralPage";
             this.tbGeneralPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbGeneralPage.Size = new System.Drawing.Size(1204, 608);
+            this.tbGeneralPage.Size = new System.Drawing.Size(1204, 584);
             this.tbGeneralPage.TabIndex = 0;
             this.tbGeneralPage.Text = "General";
             this.tbGeneralPage.UseVisualStyleBackColor = true;
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fIleToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(10, 10);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1212, 24);
+            this.menuStrip1.TabIndex = 1;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fIleToolStripMenuItem
+            // 
+            this.fIleToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openLogFileToolStripMenuItem});
+            this.fIleToolStripMenuItem.Name = "fIleToolStripMenuItem";
+            this.fIleToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fIleToolStripMenuItem.Text = "FIle";
+            // 
+            // openLogFileToolStripMenuItem
+            // 
+            this.openLogFileToolStripMenuItem.Name = "openLogFileToolStripMenuItem";
+            this.openLogFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openLogFileToolStripMenuItem.Text = "Open log file...";
+            this.openLogFileToolStripMenuItem.Click += new System.EventHandler(this.openLogFileToolStripMenuItem_Click);
+            // 
+            // chkTailing
+            // 
+            this.chkTailing.AutoSize = true;
+            this.chkTailing.Checked = true;
+            this.chkTailing.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkTailing.Location = new System.Drawing.Point(222, 17);
+            this.chkTailing.Name = "chkTailing";
+            this.chkTailing.Size = new System.Drawing.Size(81, 17);
+            this.chkTailing.TabIndex = 9;
+            this.chkTailing.Text = "Tailing read";
+            this.chkTailing.UseVisualStyleBackColor = true;
+            // 
+            // rbtnAuto
+            // 
+            this.rbtnAuto.AutoSize = true;
+            this.rbtnAuto.Checked = true;
+            this.rbtnAuto.Location = new System.Drawing.Point(3, 6);
+            this.rbtnAuto.Name = "rbtnAuto";
+            this.rbtnAuto.Size = new System.Drawing.Size(47, 17);
+            this.rbtnAuto.TabIndex = 10;
+            this.rbtnAuto.TabStop = true;
+            this.rbtnAuto.Text = "Auto";
+            this.rbtnAuto.UseVisualStyleBackColor = true;
+            // 
+            // rbtnMCD
+            // 
+            this.rbtnMCD.AutoSize = true;
+            this.rbtnMCD.Location = new System.Drawing.Point(57, 6);
+            this.rbtnMCD.Name = "rbtnMCD";
+            this.rbtnMCD.Size = new System.Drawing.Size(73, 17);
+            this.rbtnMCD.TabIndex = 11;
+            this.rbtnMCD.Text = "MCD3300";
+            this.rbtnMCD.UseVisualStyleBackColor = true;
+            // 
+            // rbtnCP
+            // 
+            this.rbtnCP.AutoSize = true;
+            this.rbtnCP.Location = new System.Drawing.Point(136, 6);
+            this.rbtnCP.Name = "rbtnCP";
+            this.rbtnCP.Size = new System.Drawing.Size(63, 17);
+            this.rbtnCP.TabIndex = 12;
+            this.rbtnCP.Text = "CP5000";
+            this.rbtnCP.UseVisualStyleBackColor = true;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.rbtnAuto);
+            this.panel2.Controls.Add(this.rbtnCP);
+            this.panel2.Controls.Add(this.rbtnMCD);
+            this.panel2.Location = new System.Drawing.Point(13, 10);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(203, 25);
+            this.panel2.TabIndex = 10;
             // 
             // frmCSMDH
             // 
@@ -492,6 +583,8 @@ namespace CSMDevHelper
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1232, 654);
             this.Controls.Add(this.tcCSMDH);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmCSMDH";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.Text = "CSM Development Helper";
@@ -508,7 +601,12 @@ namespace CSMDevHelper
             this.tbMonitorPage.PerformLayout();
             this.tbGCIDPage.ResumeLayout(false);
             this.tbGCIDPage.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -523,6 +621,7 @@ namespace CSMDevHelper
         private System.Windows.Forms.StatusStrip ssEvents;
         private System.Windows.Forms.ToolStripStatusLabel tsslEvents;
 
+        private string log_filename;
         private bool isLogUpdate;
         private TreeNode rootNode;
         private Dictionary<string, HashSet<string>> dictGCID;
@@ -567,6 +666,14 @@ namespace CSMDevHelper
         private ListBox lbFilterGCID;
         private TextBox tbGCID;
         private Button btnLogPause;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem fIleToolStripMenuItem;
+        private ToolStripMenuItem openLogFileToolStripMenuItem;
+        private CheckBox chkTailing;
+        private Panel panel2;
+        private RadioButton rbtnAuto;
+        private RadioButton rbtnCP;
+        private RadioButton rbtnMCD;
     }
 }
 

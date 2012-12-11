@@ -101,6 +101,7 @@ namespace CSMDevHelper
                             {
                                 csmevent.eventInfo.Modeling += Environment.NewLine + result;
                             }
+                            code = LogCode.LOG_MODELING;
                         }
                         else
                         {
@@ -161,7 +162,7 @@ namespace CSMDevHelper
                             JavaScriptSerializer mySer = new JavaScriptSerializer();
                             jsonDict = mySer.Deserialize<Dictionary<string, object>>(jsonString);
                             jsonDict = (Dictionary<string, object>)jsonDict["MitaiEvent"];
-                            csmevent.node = GenerateTree(jsonDict);
+                            csmevent.node = GenerateTree(jsonDict).ToList();
                             if (jsonDict.TryGetValue("Type", out outObject))
                             {
                                 eventMatch = Regex.Match((string)jsonDict["Type"], @"^(?<TYPE>\D+)\((?<TYPENUM>\d+)\)");
@@ -217,7 +218,7 @@ namespace CSMDevHelper
                     {
                         csmevent.eventInfo.Type = "Exception";
                         csmevent.eventInfo.Cause = "Invalid JSON";
-                        csmevent.node = new TreeNode[] { new TreeNode(String.Format("Exception: {0}", ex.Message)), new TreeNode(String.Format("JSON: {0}", jsonString)) };
+                        csmevent.node = new List<TreeNode> { new TreeNode(String.Format("Exception: {0}", ex.Message)), new TreeNode(String.Format("JSON: {0}", jsonString)) };
                     }
                     logResult.result = csmevent;
                     break;
@@ -226,10 +227,10 @@ namespace CSMDevHelper
             }
             return logResult;
         }
-        private TreeNode[] GenerateTree(Dictionary<string, object> jsonDict)
+
+        private List<TreeNode> GenerateTree(Dictionary<string, object> jsonDict)
         {
-            int counter = 0;
-            TreeNode[] currentNodes = new TreeNode[jsonDict.Count];
+            List<TreeNode> currentNodes = new List<TreeNode>();
             foreach (string dictKey in jsonDict.Keys)
             {
                 TreeNode currentNode = new TreeNode();
@@ -239,7 +240,7 @@ namespace CSMDevHelper
                 // Processing if value is dictionary
                 if ((object)dictValue is Dictionary<string, object>)
                 {
-                    currentNode.Nodes.AddRange(GenerateTree((Dictionary<string, object>)dictValue));
+                    currentNode.Nodes.AddRange(GenerateTree((Dictionary<string, object>)dictValue).ToArray());
                     strNode = dictKey;
                 }
                 // Processing if value is list
@@ -247,7 +248,7 @@ namespace CSMDevHelper
                 {
                     foreach (Dictionary<string, object> node in (ArrayList)dictValue)
                     {
-                        currentNode.Nodes.AddRange(GenerateTree((Dictionary<string, object>)node));
+                        currentNode.Nodes.AddRange(GenerateTree((Dictionary<string, object>)node).ToArray());
                     }
                     strNode = dictKey;
                 }
@@ -257,18 +258,26 @@ namespace CSMDevHelper
                     strNode = String.Format("{0}: {1}", dictKey, jsonDict[dictKey]);
                 }
                 currentNode.Text = strNode;
-                currentNodes[counter++] = currentNode;
+                currentNodes.Add(currentNode);
             }
             return currentNodes;
         }
-
     }
+
 
     class LogCPReader : LogReader
     {
-        private static string msgPattern = @"Rec:\s(?<MONITOR>[^\s]+)\s=>(?<G1>[^,]+),(?<G2>[^,]+),(?<G3>[^,]+),(?<G4>[^,]+),(?<G5>[^,]+).*";
-        
-        public LogCPReader(string filename, bool fromBeginning): base(filename, fromBeginning){}
+        private static string msgPattern = @"
+            Rec:\s*
+            (?<MONITOR>[^\s]*?)\s*\=\>
+            (?<ID>[^,]*?),
+            (?<TYPE>[^,]*?),
+            (?<RESYNC_CODE>[^,]*?),
+            (?<MON_REF>[^,]*?),
+            (?<INFO>.*)";
+
+        public LogCPReader(string filename, bool fromBeginning)
+            : base(filename, fromBeginning) {}
 
         public override LogResult Process()
         {
@@ -283,6 +292,203 @@ namespace CSMDevHelper
                     if (eventMatch.Success)
                     {
                         csmevent = new CSMEvent();
+                        csmevent.eventInfo.TimeStamp = logResult.timestamp;
+                        csmevent.eventInfo.MonitorHandlerExtension = eventMatch.Groups["MONITOR"].Value;
+                        csmevent.node = new List<TreeNode>();
+
+                        List<string> groups = eventMatch.Groups["INFO"].Value.Split(',').ToList();
+                        switch (eventMatch.Groups["TYPE"].Value)
+                        {
+                            case "CC":
+                                csmevent.eventInfo.Type = "Call Cleared";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.Cause = groups[1];
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transferred CID", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transfer destination", groups[3])));
+                                break;
+                            case "CO":
+                                csmevent.eventInfo.Type = "Conferenced";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Subject EXT", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "PGCID", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "SGCID", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Conference controller EXT", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Number of parties", groups[4])));
+                                for(int i = 5, j = 1; i < groups.Count -1; i += 2, j++)
+                                {
+                                    csmevent.node.Add(new TreeNode(String.Format("Party #{0}: {1}", j, groups[i])));
+                                    csmevent.node.Add(new TreeNode(String.Format("Party #{0}: {1}", j, groups[i+1])));
+                                }
+                                csmevent.eventInfo.Cause = groups[groups.Count-1];
+                                break;
+                            case "XC":
+                                csmevent.eventInfo.Type = "Connection Cleared";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Cleared EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Terminating EXT", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[3])));
+                                csmevent.eventInfo.Cause = groups[4];
+                                break;
+                            case "DE":
+                                csmevent.eventInfo.Type = "Delivered";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Alerting internal EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Alerting outside number", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Alerting device type", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller name", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller number", groups[6])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk name", groups[7])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk outside number", groups[8])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Calling device type", groups[9])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Originally called device", groups[10])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Last redirection EXT", groups[11])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Account code", groups[12])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[13])));
+                                csmevent.eventInfo.Cause = groups[14];
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "ACD/UCD group", groups[15])));
+                                break;
+                            case "DI":
+                                csmevent.eventInfo.Type = "Diverted";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Diverted from EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "New destination EXT", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Diverted to outside EXT", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[4])));
+                                csmevent.eventInfo.Cause = groups[5];
+                                break;
+                            case "ER":
+                                csmevent.eventInfo.Type = "Established Routing";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering internal EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering outside number", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering device type", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller number", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk outside number", groups[6])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Calling device type", groups[7])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Originally called device", groups[8])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Last redirection EXT", groups[9])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[10])));
+                                csmevent.eventInfo.Cause = groups[11];
+
+                                break;
+                            case "ES":
+                                csmevent.eventInfo.Type = "Established";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering internal EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering outside number", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering device type", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller number", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk outside number", groups[6])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Calling device type", groups[7])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Originally called device", groups[8])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Last redirection EXT", groups[9])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[10])));
+                                csmevent.eventInfo.Cause = groups[11];
+                                break;
+                            case "FA":
+                                csmevent.eventInfo.Type = "Failed";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Failed EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Called number", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[3])));
+                                csmevent.eventInfo.Cause = groups[4];
+                                break;
+                            case "HE":
+                                csmevent.eventInfo.Type = "Held";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Activate hold EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[2])));
+                                csmevent.eventInfo.Cause = groups[3];
+                                break;
+                            case "NT":
+                                csmevent.eventInfo.Type = "Network Reached";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk used", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Dialed number", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[3])));
+                                csmevent.eventInfo.Cause = groups[4];
+                                break;
+                            case "OR":
+                                csmevent.eventInfo.Type = "Originated";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller number", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Calling device type", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Dialed number", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Account code", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[6])));
+                                csmevent.eventInfo.Cause = groups[7];
+                                break;
+                            case "QU":
+                                csmevent.eventInfo.Type = "Queued";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Queued EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[2])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller name", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller number", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk name", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk outside number", groups[6])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Calling device type", groups[7])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Originally called device", groups[8])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Last redirection EXT", groups[9])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Number queued", groups[10])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Acoount code", groups[11])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[12])));
+                                csmevent.eventInfo.Cause = groups[13];
+                                break;
+                            case "RE":
+                                csmevent.eventInfo.Type = "Retrieved";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Retrieving EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[2])));
+                                csmevent.eventInfo.Cause = groups[3];
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal retrieved EXT", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Retrieving device outside number", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Retrieving device trunk number", groups[6])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Retrieving device type", groups[7])));
+                                break;
+                            case "SI":
+                                csmevent.eventInfo.Type = "Service Initiated";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Initiating EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[2])));
+                                csmevent.eventInfo.Cause = groups[3];
+                                if (groups.Count > 4)
+                                {
+                                    csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Callback target EXT", groups[4])));
+                                }
+                                break;
+                            case "TR":
+                                csmevent.eventInfo.Type = "Transferred";
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transferred CID", groups[0])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transferring EXT", groups[1])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transferred EXT", groups[3])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Announcement CID", groups[4])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Destination EXT", groups[5])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller name", groups[6])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller EXT", groups[7])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk name", groups[8])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk outside EXT", groups[9])));
+                                csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[10])));
+                                csmevent.eventInfo.Cause = groups[11];
+                                break;
+                            default:
+                                csmevent.eventInfo.Type = String.Format("{0} ({1})", csmevent.eventInfo.Type, eventMatch.Groups["TYPE"].Value);
+                                int index = 1;
+                                foreach (string item in groups)
+                                {
+                                    csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", index++, item)));
+                                }
+                                break;
+                        }
+                        csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "ID", eventMatch.Groups["ID"].Value)));
+                        csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Type", eventMatch.Groups["TYPE"].Value)));
+                        csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Cause", csmevent.eventInfo.Cause)));
+                        csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Monitor", csmevent.Monitor)));
+                        csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Resync Code", eventMatch.Groups["RESYNC_CODE"].Value)));
+                        csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Mon cross Ref ID", eventMatch.Groups["MON_REF"].Value)));
                         logResult.result = csmevent;
                     }
                     else
