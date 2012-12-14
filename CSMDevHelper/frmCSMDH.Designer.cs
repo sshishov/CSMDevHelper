@@ -619,7 +619,19 @@ namespace CSMDevHelper
             // 
             // comboBox1
             // 
+            this.comboBox1.DisplayMember = "(none)";
             this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "6.0.1.1",
+            "6.0.1.1_1",
+            "6.0.1.1_2",
+            "6.0.1.1_3",
+            "6.0.1.1_4",
+            "6.0.1.1_5",
+            "6.0.1.1_6",
+            "6.0.1.1_7",
+            "6.0.1.1_8",
+            "6.1.0.0"});
             this.comboBox1.Location = new System.Drawing.Point(262, 25);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(153, 21);

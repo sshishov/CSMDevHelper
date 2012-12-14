@@ -566,8 +566,14 @@ namespace CSMDevHelper
 
         private void button1_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(String.Format("-{0}-", registryHandler.DriverVersion));
-            updateVersionLabel();
+            if (comboBox1.Text != String.Empty)
+            {
+                
+            }
+            LibraryHandler libHandler = new LibraryHandler();
+            libHandler.UnregisterDll("TelCommon.dll");
+            libHandler.RegisterDll("TelCommon.dll");
+
         }
     }
 }

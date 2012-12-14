@@ -68,6 +68,7 @@
   <ItemGroup>
     <Compile Include="CustomBindingList.cs" />
     <Compile Include="EventNode.cs" />
+    <Compile Include="LibraryHandler.cs" />
     <Compile Include="LogReader.cs" />
     <Compile Include="frmCSMDH.cs">
       <SubType>Form</SubType>
