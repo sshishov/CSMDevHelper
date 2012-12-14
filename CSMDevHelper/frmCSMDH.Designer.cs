@@ -36,6 +36,11 @@ namespace CSMDevHelper
             this.tcCSMDH = new System.Windows.Forms.TabControl();
             this.tbLogPage = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.rbtnAuto = new System.Windows.Forms.RadioButton();
+            this.rbtnCP = new System.Windows.Forms.RadioButton();
+            this.rbtnMCD = new System.Windows.Forms.RadioButton();
+            this.chkTailing = new System.Windows.Forms.CheckBox();
             this.btnLogStop = new System.Windows.Forms.Button();
             this.ssEvents = new System.Windows.Forms.StatusStrip();
             this.tsslEvents = new System.Windows.Forms.ToolStripStatusLabel();
@@ -71,24 +76,25 @@ namespace CSMDevHelper
             this.btnLogPause = new System.Windows.Forms.Button();
             this.treeLog = new System.Windows.Forms.TreeView();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
+            this.label1 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fIleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chkTailing = new System.Windows.Forms.CheckBox();
-            this.rbtnAuto = new System.Windows.Forms.RadioButton();
-            this.rbtnMCD = new System.Windows.Forms.RadioButton();
-            this.rbtnCP = new System.Windows.Forms.RadioButton();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.tcCSMDH.SuspendLayout();
             this.tbLogPage.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.ssEvents.SuspendLayout();
             this.tcLogFilters.SuspendLayout();
             this.tbEventPage.SuspendLayout();
             this.tbMonitorPage.SuspendLayout();
             this.tbGCIDPage.SuspendLayout();
+            this.tbGeneralPage.SuspendLayout();
             this.menuStrip1.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcCSMDH
@@ -129,6 +135,60 @@ namespace CSMDevHelper
             this.panel1.Padding = new System.Windows.Forms.Padding(10);
             this.panel1.Size = new System.Drawing.Size(538, 564);
             this.panel1.TabIndex = 9;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.rbtnAuto);
+            this.panel2.Controls.Add(this.rbtnCP);
+            this.panel2.Controls.Add(this.rbtnMCD);
+            this.panel2.Location = new System.Drawing.Point(13, 10);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(203, 25);
+            this.panel2.TabIndex = 10;
+            // 
+            // rbtnAuto
+            // 
+            this.rbtnAuto.AutoSize = true;
+            this.rbtnAuto.Checked = true;
+            this.rbtnAuto.Location = new System.Drawing.Point(3, 6);
+            this.rbtnAuto.Name = "rbtnAuto";
+            this.rbtnAuto.Size = new System.Drawing.Size(47, 17);
+            this.rbtnAuto.TabIndex = 10;
+            this.rbtnAuto.TabStop = true;
+            this.rbtnAuto.Text = "Auto";
+            this.rbtnAuto.UseVisualStyleBackColor = true;
+            // 
+            // rbtnCP
+            // 
+            this.rbtnCP.AutoSize = true;
+            this.rbtnCP.Location = new System.Drawing.Point(136, 6);
+            this.rbtnCP.Name = "rbtnCP";
+            this.rbtnCP.Size = new System.Drawing.Size(63, 17);
+            this.rbtnCP.TabIndex = 12;
+            this.rbtnCP.Text = "CP5000";
+            this.rbtnCP.UseVisualStyleBackColor = true;
+            // 
+            // rbtnMCD
+            // 
+            this.rbtnMCD.AutoSize = true;
+            this.rbtnMCD.Location = new System.Drawing.Point(57, 6);
+            this.rbtnMCD.Name = "rbtnMCD";
+            this.rbtnMCD.Size = new System.Drawing.Size(73, 17);
+            this.rbtnMCD.TabIndex = 11;
+            this.rbtnMCD.Text = "MCD3300";
+            this.rbtnMCD.UseVisualStyleBackColor = true;
+            // 
+            // chkTailing
+            // 
+            this.chkTailing.AutoSize = true;
+            this.chkTailing.Checked = true;
+            this.chkTailing.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkTailing.Location = new System.Drawing.Point(222, 17);
+            this.chkTailing.Name = "chkTailing";
+            this.chkTailing.Size = new System.Drawing.Size(81, 17);
+            this.chkTailing.TabIndex = 9;
+            this.chkTailing.Text = "Tailing read";
+            this.chkTailing.UseVisualStyleBackColor = true;
             // 
             // btnLogStop
             // 
@@ -279,7 +339,7 @@ namespace CSMDevHelper
             this.tbMonitorPage.Location = new System.Drawing.Point(4, 22);
             this.tbMonitorPage.Name = "tbMonitorPage";
             this.tbMonitorPage.Padding = new System.Windows.Forms.Padding(3);
-            this.tbMonitorPage.Size = new System.Drawing.Size(504, 452);
+            this.tbMonitorPage.Size = new System.Drawing.Size(504, 462);
             this.tbMonitorPage.TabIndex = 1;
             this.tbMonitorPage.Text = "Monitor";
             this.tbMonitorPage.UseVisualStyleBackColor = true;
@@ -372,7 +432,7 @@ namespace CSMDevHelper
             this.tbGCIDPage.Controls.Add(this.tbGCID);
             this.tbGCIDPage.Location = new System.Drawing.Point(4, 22);
             this.tbGCIDPage.Name = "tbGCIDPage";
-            this.tbGCIDPage.Size = new System.Drawing.Size(504, 452);
+            this.tbGCIDPage.Size = new System.Drawing.Size(504, 462);
             this.tbGCIDPage.TabIndex = 2;
             this.tbGCIDPage.Text = "GCID";
             this.tbGCIDPage.UseVisualStyleBackColor = true;
@@ -490,13 +550,36 @@ namespace CSMDevHelper
             // 
             // tbGeneralPage
             // 
+            this.tbGeneralPage.Controls.Add(this.comboBox1);
+            this.tbGeneralPage.Controls.Add(this.groupBox1);
+            this.tbGeneralPage.Controls.Add(this.button1);
             this.tbGeneralPage.Location = new System.Drawing.Point(4, 22);
             this.tbGeneralPage.Name = "tbGeneralPage";
-            this.tbGeneralPage.Padding = new System.Windows.Forms.Padding(3);
+            this.tbGeneralPage.Padding = new System.Windows.Forms.Padding(10);
             this.tbGeneralPage.Size = new System.Drawing.Size(1204, 584);
             this.tbGeneralPage.TabIndex = 0;
             this.tbGeneralPage.Text = "General";
             this.tbGeneralPage.UseVisualStyleBackColor = true;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(6, 25);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(184, 112);
+            this.label1.TabIndex = 1;
+            this.label1.Text = "DataManager: x.xx.xxxx\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n";
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(423, 318);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 0;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // menuStrip1
             // 
@@ -519,63 +602,28 @@ namespace CSMDevHelper
             // openLogFileToolStripMenuItem
             // 
             this.openLogFileToolStripMenuItem.Name = "openLogFileToolStripMenuItem";
-            this.openLogFileToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openLogFileToolStripMenuItem.Size = new System.Drawing.Size(151, 22);
             this.openLogFileToolStripMenuItem.Text = "Open log file...";
             this.openLogFileToolStripMenuItem.Click += new System.EventHandler(this.openLogFileToolStripMenuItem_Click);
             // 
-            // chkTailing
+            // groupBox1
             // 
-            this.chkTailing.AutoSize = true;
-            this.chkTailing.Checked = true;
-            this.chkTailing.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkTailing.Location = new System.Drawing.Point(222, 17);
-            this.chkTailing.Name = "chkTailing";
-            this.chkTailing.Size = new System.Drawing.Size(81, 17);
-            this.chkTailing.TabIndex = 9;
-            this.chkTailing.Text = "Tailing read";
-            this.chkTailing.UseVisualStyleBackColor = true;
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox1.Location = new System.Drawing.Point(13, 13);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(195, 150);
+            this.groupBox1.TabIndex = 2;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Versions";
             // 
-            // rbtnAuto
+            // comboBox1
             // 
-            this.rbtnAuto.AutoSize = true;
-            this.rbtnAuto.Checked = true;
-            this.rbtnAuto.Location = new System.Drawing.Point(3, 6);
-            this.rbtnAuto.Name = "rbtnAuto";
-            this.rbtnAuto.Size = new System.Drawing.Size(47, 17);
-            this.rbtnAuto.TabIndex = 10;
-            this.rbtnAuto.TabStop = true;
-            this.rbtnAuto.Text = "Auto";
-            this.rbtnAuto.UseVisualStyleBackColor = true;
-            // 
-            // rbtnMCD
-            // 
-            this.rbtnMCD.AutoSize = true;
-            this.rbtnMCD.Location = new System.Drawing.Point(57, 6);
-            this.rbtnMCD.Name = "rbtnMCD";
-            this.rbtnMCD.Size = new System.Drawing.Size(73, 17);
-            this.rbtnMCD.TabIndex = 11;
-            this.rbtnMCD.Text = "MCD3300";
-            this.rbtnMCD.UseVisualStyleBackColor = true;
-            // 
-            // rbtnCP
-            // 
-            this.rbtnCP.AutoSize = true;
-            this.rbtnCP.Location = new System.Drawing.Point(136, 6);
-            this.rbtnCP.Name = "rbtnCP";
-            this.rbtnCP.Size = new System.Drawing.Size(63, 17);
-            this.rbtnCP.TabIndex = 12;
-            this.rbtnCP.Text = "CP5000";
-            this.rbtnCP.UseVisualStyleBackColor = true;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.rbtnAuto);
-            this.panel2.Controls.Add(this.rbtnCP);
-            this.panel2.Controls.Add(this.rbtnMCD);
-            this.panel2.Location = new System.Drawing.Point(13, 10);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(203, 25);
-            this.panel2.TabIndex = 10;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(262, 25);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(153, 21);
+            this.comboBox1.TabIndex = 3;
             // 
             // frmCSMDH
             // 
@@ -592,6 +640,8 @@ namespace CSMDevHelper
             this.tbLogPage.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ssEvents.ResumeLayout(false);
             this.ssEvents.PerformLayout();
             this.tcLogFilters.ResumeLayout(false);
@@ -601,10 +651,11 @@ namespace CSMDevHelper
             this.tbMonitorPage.PerformLayout();
             this.tbGCIDPage.ResumeLayout(false);
             this.tbGCIDPage.PerformLayout();
+            this.tbGeneralPage.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -620,6 +671,7 @@ namespace CSMDevHelper
         private System.Threading.Thread logThread;
         private System.Windows.Forms.StatusStrip ssEvents;
         private System.Windows.Forms.ToolStripStatusLabel tsslEvents;
+        private RegistryHandler registryHandler;
 
         private string log_filename;
         private bool isLogUpdate;
@@ -674,6 +726,10 @@ namespace CSMDevHelper
         private RadioButton rbtnAuto;
         private RadioButton rbtnCP;
         private RadioButton rbtnMCD;
+        private Button button1;
+        private Label label1;
+        private GroupBox groupBox1;
+        private ComboBox comboBox1;
     }
 }
 

@@ -51,10 +51,13 @@ namespace CSMDevHelper
             this.listFilterNode.ListChanged += new ListChangedEventHandler(listFilterNode_ListChanged);
 
             this.log_filename = @"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log";
+            this.registryHandler = new RegistryHandler();
+            updateVersionLabel();
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
         {
+            LogReader logReader;
             listNode.Clear();
             listFilterNode.Clear();
             tbEvent.Clear();
@@ -70,86 +73,102 @@ namespace CSMDevHelper
             tbFilterGCID.Clear();
             listFilterGCID.Clear();
 
-            treeLog.Enabled = false;
-            tbMonitorPage.Enabled = false;
-            tbEventPage.Enabled = false;
-            tbGCIDPage.Enabled = false;
-
+            rbtnAuto.Enabled = false;
+            rbtnCP.Enabled = false;
+            rbtnMCD.Enabled = false;
             btnLogStart.Enabled = false;
             btnLogStop.Enabled = true;
             btnLogPause.Enabled = true;
             isLogUpdate = true;
 
-            ThreadStart sthread = new ThreadStart(ThreadLogUpdate);
-            logThread = new Thread(sthread);
-            myDelegate = new LogUpdateDelegate(this.LogUpdate);
+            try
+            {
+                if (rbtnMCD.Checked)
+                {
+                    logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
+                }
+                else if (rbtnCP.Checked)
+                {
+                    logReader = new LogCPReader(log_filename, !chkTailing.Checked);
+                }
+                else
+                {
+                    //TODO Fill this section
+                    logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                openLogFile(sender, e);
+                btnLogStop_Click(sender, e);
+                return;
+            }
+
+            logThread = new Thread(new ParameterizedThreadStart(this.ThreadLogUpdate));
+            this.myDelegate = new LogUpdateDelegate(this.LogUpdate);
             logThread.Name = "LogReaderThread";
             logThread.Priority = ThreadPriority.Lowest;
             logThread.IsBackground = true;
-            logThread.Start();
-            while (!logThread.IsAlive) ;
+            logThread.Start(logReader);
+            while (!logThread.IsAlive);
+            blockControls(sender, e);
         }
 
         private void btnLogStop_Click(object sender, EventArgs e)
         {
-            treeLog.Enabled = true;
-            tbMonitorPage.Enabled = true;
-            tbEventPage.Enabled = true;
-            tbGCIDPage.Enabled = true;
-
             this.isLogUpdate = false;
             //this.logThread.Join();
+            rbtnAuto.Enabled = true;
+            rbtnCP.Enabled = true;
+            rbtnMCD.Enabled = true;
             btnLogStart.Enabled = true;
             btnLogStop.Enabled = false;
             btnLogPause.Enabled = false;
             btnLogPause.Text = "Pause";
+            unblockControls(sender, e);
         }
 
         private void btnLogPause_Click(object sender, EventArgs e)
         {
             if (btnLogPause.Text == "Pause")
             {
-                btnLogPause.Text = "Resume";
                 // Deprecated and should be changed to more convenience manner
                 logThread.Suspend();
-                treeLog.Enabled = true;
-                tbMonitorPage.Enabled = true;
-                tbEventPage.Enabled = true;
-                tbGCIDPage.Enabled = true;
+                btnLogPause.Text = "Resume";
+                unblockControls(sender, e);
             }
             else
             {
-                btnLogPause.Text = "Pause";
                 // Deprecated and should be changed to more convenience manner
                 logThread.Resume();
-                treeLog.Enabled = false;
-                tbMonitorPage.Enabled = false;
-                tbEventPage.Enabled = false;
-                tbGCIDPage.Enabled = false;
+                btnLogPause.Text = "Pause";
+                blockControls(sender, e);
             }
         }
 
-        void ThreadLogUpdate()
+        void blockControls(object sender, EventArgs e)
+        {
+            treeLog.Enabled = false;
+            tbMonitorPage.Enabled = false;
+            tbEventPage.Enabled = false;
+            tbGCIDPage.Enabled = false;
+        }
+
+        void unblockControls(object sender, EventArgs e)
+        {
+            treeLog.Enabled = true;
+            tbMonitorPage.Enabled = true;
+            tbEventPage.Enabled = true;
+            tbGCIDPage.Enabled = true;
+        }
+
+        void ThreadLogUpdate(object logReader)
         {
             LogResult logResult;
-            LogReader logReader;
-
-            if (rbtnMCD.Checked)
-            {
-                logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
-            }
-            else if (rbtnCP.Checked)
-            {
-                logReader = new LogCPReader(log_filename, !chkTailing.Checked);
-            }
-            else
-            {
-                //TODO Fill this section
-                logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
-            }
             while(this.isLogUpdate)
             {
-                logResult = logReader.Process();
+                logResult = ((LogReader)logReader).Process();
                 Invoke(this.myDelegate, logResult);
             }
         }
@@ -283,7 +302,6 @@ namespace CSMDevHelper
             btnFilterAll(sender, e, lbFilterEvent, tbEvent, tbFilterEvent, listFilterEvent, listEvent);
         }
 
-
         private void btnAddMonitor_Click(object sender, EventArgs e)
         {
             btnFilter(sender, e, lbMonitor, tbMonitor, tbFilterMonitor, listMonitor, listFilterMonitor);
@@ -347,7 +365,6 @@ namespace CSMDevHelper
             }
             btnFilter(sender, e, lb, tb1, tb2, lstDel, lstAdd);
         }
-
 
         private void listFilterEvent_ListChanged(object sender, ListChangedEventArgs e)
         {
@@ -418,7 +435,6 @@ namespace CSMDevHelper
             }
         }
 
-
         private void listNode_ListChanged(object sender, ListChangedEventArgs e)
         {
             CustomBindingList<TreeNode> handler = (CustomBindingList<TreeNode>)sender;
@@ -448,7 +464,6 @@ namespace CSMDevHelper
             tsslEvents.Text = String.Format("Event count = {0}, Filtered event count = {1}",
                 this.listNode.Count, this.listFilterNode.Count);
         }
-
 
         private static void FireEvent(Object targetObject, string eventName, EventArgs e)
         {
@@ -515,6 +530,11 @@ namespace CSMDevHelper
 
         private void openLogFileToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            openLogFile(sender, e);
+        }
+
+        private void openLogFile(object sender, EventArgs e)
+        {
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "Select LOG file";
             if (dialog.ShowDialog() == DialogResult.OK)
@@ -522,6 +542,32 @@ namespace CSMDevHelper
                 log_filename = dialog.FileName;
                 this.btnLogStop_Click(sender, e);
             }
+        }
+
+        private void updateVersionLabel()
+        {
+            label1.Text = String.Format("{0,-13}{1}{14}{2,-13}{3}{14}{4,-13}{5}{14}{6,-13}{7}{14}{8,-13}{9}{14}{10,-13}{11}{14}{12,-13}{13}",
+                "Client: ",
+                registryHandler.ClientVersion,
+                "DataManager: ",
+                registryHandler.DataManagerVersion,
+                "RealViewer: ",
+                registryHandler.RealViewerVersion,
+                "Reporter: ",
+                registryHandler.ReporterVersion,
+                "ReporterRT: ",
+                registryHandler.ReporterRealTimeVersion,
+                "Router: ",
+                registryHandler.RouterVersion,
+                "Server: ",
+                registryHandler.ServerVersion,
+                Environment.NewLine);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(String.Format("-{0}-", registryHandler.DriverVersion));
+            updateVersionLabel();
         }
     }
 }
