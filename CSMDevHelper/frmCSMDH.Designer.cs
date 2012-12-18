@@ -76,13 +76,13 @@ namespace CSMDevHelper
             this.btnLogPause = new System.Windows.Forms.Button();
             this.treeLog = new System.Windows.Forms.TreeView();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fIleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openLogFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.tcCSMDH.SuspendLayout();
             this.tbLogPage.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -93,8 +93,8 @@ namespace CSMDevHelper
             this.tbMonitorPage.SuspendLayout();
             this.tbGCIDPage.SuspendLayout();
             this.tbGeneralPage.SuspendLayout();
-            this.menuStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tcCSMDH
@@ -561,6 +561,37 @@ namespace CSMDevHelper
             this.tbGeneralPage.Text = "General";
             this.tbGeneralPage.UseVisualStyleBackColor = true;
             // 
+            // comboBox1
+            // 
+            this.comboBox1.DisplayMember = "(none)";
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "6.0.1.1",
+            "6.0.1.1_1",
+            "6.0.1.1_2",
+            "6.0.1.1_3",
+            "6.0.1.1_4",
+            "6.0.1.1_5",
+            "6.0.1.1_6",
+            "6.0.1.1_7",
+            "6.0.1.1_8",
+            "6.1.0.0"});
+            this.comboBox1.Location = new System.Drawing.Point(262, 25);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(153, 21);
+            this.comboBox1.TabIndex = 3;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.groupBox1.Location = new System.Drawing.Point(13, 13);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(195, 150);
+            this.groupBox1.TabIndex = 2;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Versions";
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -606,37 +637,6 @@ namespace CSMDevHelper
             this.openLogFileToolStripMenuItem.Text = "Open log file...";
             this.openLogFileToolStripMenuItem.Click += new System.EventHandler(this.openLogFileToolStripMenuItem_Click);
             // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Font = new System.Drawing.Font("Courier New", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(13, 13);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(195, 150);
-            this.groupBox1.TabIndex = 2;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Versions";
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.DisplayMember = "(none)";
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "6.0.1.1",
-            "6.0.1.1_1",
-            "6.0.1.1_2",
-            "6.0.1.1_3",
-            "6.0.1.1_4",
-            "6.0.1.1_5",
-            "6.0.1.1_6",
-            "6.0.1.1_7",
-            "6.0.1.1_8",
-            "6.1.0.0"});
-            this.comboBox1.Location = new System.Drawing.Point(262, 25);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(153, 21);
-            this.comboBox1.TabIndex = 3;
-            // 
             // frmCSMDH
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -648,6 +648,7 @@ namespace CSMDevHelper
             this.Name = "frmCSMDH";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.Text = "CSM Development Helper";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmCSMDH_FormClosed);
             this.tcCSMDH.ResumeLayout(false);
             this.tbLogPage.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -664,10 +665,10 @@ namespace CSMDevHelper
             this.tbGCIDPage.ResumeLayout(false);
             this.tbGCIDPage.PerformLayout();
             this.tbGeneralPage.ResumeLayout(false);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -686,7 +687,6 @@ namespace CSMDevHelper
         private RegistryHandler registryHandler;
 
         private string log_filename;
-        private bool isLogUpdate;
         private TreeNode rootNode;
         private Dictionary<string, HashSet<string>> dictGCID;
         private CustomBindingList<string> listMonitor;
@@ -698,6 +698,7 @@ namespace CSMDevHelper
         private CustomBindingList<TreeNode> listNode;
         private CustomBindingList<TreeNode> listFilterNode;
         private ToolTip toolTip;
+        private Form ModelingForm;
         private Panel panel1;
         private Button btnLogStop;
         private Button btnLogStart;

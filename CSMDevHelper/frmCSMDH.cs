@@ -13,12 +13,23 @@ namespace CSMDevHelper
 {
     delegate void LogUpdateDelegate(LogResult logResult);
 
+    internal enum ThreadState : int
+    {
+        RUN = 0,
+        PAUSE = 1,
+        EXIT = 2,
+    };
+
+
     public partial class frmCSMDH : Form
     {
+
+        private EventWaitHandle waitHandle;
+        private volatile ThreadState threadState;
+
         public frmCSMDH()
         {
             InitializeComponent();
-            this.isLogUpdate = false;
             this.rootNode = null;
             this.toolTip = null;
             this.treeLog.Sorted = true;
@@ -52,11 +63,14 @@ namespace CSMDevHelper
 
             this.log_filename = @"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log";
             this.registryHandler = new RegistryHandler();
+
+            this.waitHandle = new AutoResetEvent(false);
             updateVersionLabel();
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
         {
+            this.threadState = ThreadState.RUN;
             LogReader logReader;
             listNode.Clear();
             listFilterNode.Clear();
@@ -79,7 +93,6 @@ namespace CSMDevHelper
             btnLogStart.Enabled = false;
             btnLogStop.Enabled = true;
             btnLogPause.Enabled = true;
-            isLogUpdate = true;
 
             try
             {
@@ -117,8 +130,8 @@ namespace CSMDevHelper
 
         private void btnLogStop_Click(object sender, EventArgs e)
         {
-            this.isLogUpdate = false;
-            //this.logThread.Join();
+            this.threadState = ThreadState.EXIT;
+            waitHandle.Reset();
             rbtnAuto.Enabled = true;
             rbtnCP.Enabled = true;
             rbtnMCD.Enabled = true;
@@ -133,15 +146,15 @@ namespace CSMDevHelper
         {
             if (btnLogPause.Text == "Pause")
             {
-                // Deprecated and should be changed to more convenience manner
-                logThread.Suspend();
+                waitHandle.Reset();
+                threadState = ThreadState.PAUSE;
                 btnLogPause.Text = "Resume";
                 unblockControls(sender, e);
             }
             else
             {
-                // Deprecated and should be changed to more convenience manner
-                logThread.Resume();
+                waitHandle.Set();
+                threadState = ThreadState.RUN;
                 btnLogPause.Text = "Pause";
                 blockControls(sender, e);
             }
@@ -166,8 +179,12 @@ namespace CSMDevHelper
         void ThreadLogUpdate(object logReader)
         {
             LogResult logResult;
-            while(this.isLogUpdate)
+            while(threadState != ThreadState.EXIT)
             {
+                if (threadState == ThreadState.PAUSE)
+                {
+                    waitHandle.WaitOne();
+                }
                 logResult = ((LogReader)logReader).Process();
                 Invoke(this.myDelegate, logResult);
             }
@@ -175,60 +192,57 @@ namespace CSMDevHelper
 
         void LogUpdate(LogResult logResult)
         {
-            if (this.isLogUpdate)
+            CSMEvent tag;
+            switch (logResult.code)
             {
-                CSMEvent tag;
-                switch (logResult.code)
-                {
-                    case LogCode.LOG_EVENT:
-                        rootNode = new TreeNode();
-                        rootNode.Tag = logResult.result;
-                        tag = (CSMEvent)this.rootNode.Tag;
-                        rootNode.Nodes.AddRange(tag.node.ToArray());
-                        // Updating Event checklist
-                        if (!lbEvent.Items.Contains(tag.eventInfo.Type))
+                case LogCode.LOG_EVENT:
+                    rootNode = new TreeNode();
+                    rootNode.Tag = logResult.result;
+                    tag = (CSMEvent)this.rootNode.Tag;
+                    rootNode.Nodes.AddRange(tag.node.ToArray());
+                    // Updating Event checklist
+                    if (!lbEvent.Items.Contains(tag.eventInfo.Type))
+                    {
+                        this.listEvent.Add(tag.eventInfo.Type);
+                    }
+                    // Updating Monitor checklist
+                    if (!listMonitor.Contains(tag.Monitor))
+                    {
+                        listMonitor.Add(tag.Monitor);
+                    }
+                    //Updating GCID checklist
+                    foreach (string gcid in tag.CID)
+                    {
+                        if (this.dictGCID.ContainsKey(gcid))
                         {
-                            this.listEvent.Add(tag.eventInfo.Type);
+                            this.dictGCID[gcid].Union(tag.CID);
                         }
-                        // Updating Monitor checklist
-                        if (!listMonitor.Contains(tag.Monitor))
+                        else
                         {
-                            listMonitor.Add(tag.Monitor);
+                            this.dictGCID[gcid] = tag.CID;
                         }
-                        //Updating GCID checklist
-                        foreach (string gcid in tag.GCID)
+                        if (!listGCID.Contains(gcid))
                         {
-                            if (this.dictGCID.ContainsKey(gcid))
-                            {
-                                this.dictGCID[gcid].Union(tag.GCID);
-                            }
-                            else
-                            {
-                                this.dictGCID[gcid] = tag.GCID;
-                            }
-                            if (!listGCID.Contains(gcid))
-                            {
-                                listGCID.Add(gcid);
-                            }
+                            listGCID.Add(gcid);
                         }
-                        rootNode.Name = tag.eventInfo.Type;
-                        rootNode.Text = String.Format("{0,4}> {1,-25}: {2,-20} ({3,15})", treeLog.Nodes.Count + 1, tag.eventInfo.Type, tag.eventInfo.Cause, tag.eventInfo.TimeStamp);
-                        if (tag.Parked)
-                        {
-                            rootNode.Text = String.Format("{0} <== Parked", this.Text);
-                        }
-                        rootNode.ForeColor = tag.GetColor();
-                        listNode.Add(rootNode);
-                        break;
-                    case LogCode.LOG_MODELING:
-                        rootNode.BackColor = Color.Lavender;
-                        break;
-                    case LogCode.LOG_LEG:
-                        break;
-                    case LogCode.LOG_NOTHING:
-                    default:
-                        break;
-                }
+                    }
+                    rootNode.Name = tag.eventInfo.Type;
+                    rootNode.Text = String.Format("{0,4}> {1,-25}: {2,-20} ({3,15})", treeLog.Nodes.Count + 1, tag.eventInfo.Type, tag.eventInfo.Cause, tag.eventInfo.TimeStamp);
+                    if (tag.Parked)
+                    {
+                        rootNode.Text = String.Format("{0} <== Parked", this.Text);
+                    }
+                    rootNode.ForeColor = tag.GetColor();
+                    listNode.Add(rootNode);
+                    break;
+                case LogCode.LOG_MODELING:
+                    rootNode.BackColor = Color.Lavender;
+                    break;
+                case LogCode.LOG_LEG:
+                    break;
+                case LogCode.LOG_NOTHING:
+                default:
+                    break;
             }
         }
 
@@ -481,7 +495,7 @@ namespace CSMDevHelper
 
         private void treeLog_MouseDown(object sender, MouseEventArgs e)
         {
-            if (toolTip == null)
+            if (ModelingForm ==null)
             {
                 if (e.Button == MouseButtons.Right)
                 {
@@ -489,33 +503,67 @@ namespace CSMDevHelper
                     if (node != null && node.Parent == null)
                     {
                         CSMEvent tag = (CSMEvent)node.Tag;
-                        string msgToolTip = String.Format("{0:4}Monitor: {1}", String.Empty, tag.eventInfo.MonitorHandlerExtension);
-                        if (tag.eventInfo.CGCID != default(string))
+                        ModelingForm = new Form();
+                        ModelingForm.SuspendLayout();
+                        ModelingForm.StartPosition = FormStartPosition.Manual;
+                        ModelingForm.Left = Cursor.Position.X + 5;
+                        ModelingForm.Top = Cursor.Position.Y + 5;
+                        ModelingForm.Width = 0;
+                        ModelingForm.Height = 0;
+                        ModelingForm.FormBorderStyle = FormBorderStyle.None;
+                        ModelingForm.Name = "frmModeling";
+                        ModelingForm.BackColor = System.Drawing.Color.LightGray;
+                        TextBox eee = new TextBox();
+                        eee.Margin = new System.Windows.Forms.Padding(0);
+                        eee.Multiline = true;
+                        eee.ReadOnly = true;
+                        TextBox eee1 = new TextBox();
+                        eee1.Text = "eeee";
+                        eee1.Dock = DockStyle.Top;
+                        //eee.Dock = DockStyle.Fill;
+                        using (Graphics g = eee.CreateGraphics())
                         {
-                            msgToolTip += String.Format("{0}{1:4}CGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.CGCID);
+                            eee.Size = g.MeasureString(tag.eventInfo.Modeling, eee.Font).ToSize();
+                            eee.Text = tag.eventInfo.Modeling;
                         }
-                        if (tag.eventInfo.PGCID != default(string))
+                        using (Graphics g = eee1.CreateGraphics())
                         {
-                            msgToolTip += String.Format("{0}{1:4}PGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.PGCID);
+                            eee1.Size = g.MeasureString(eee1.Text, eee1.Font).ToSize();
                         }
-                        if (tag.eventInfo.SGCID != default(string))
-                        {
-                            msgToolTip += String.Format("{0}{1:4}SGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.SGCID);
-                        }
-                        msgToolTip += String.Format("{0}{1}", Environment.NewLine, tag.eventInfo.Modeling);
-                        toolTip = new ToolTip();
-                        toolTip.ToolTipTitle = String.Format("Event: {0}", tag.eventInfo.Type);
-                        toolTip.UseAnimation = false;
-                        toolTip.UseFading = false;
-                        toolTip.Show(msgToolTip, (IWin32Window)sender, e.X, e.Y);
-                        treeLog.SelectedNode = node;
+                        ModelingForm.Controls.AddRange(new Control[] {eee});
+                        ModelingForm.AutoSize = true;
+                        ModelingForm.Show(this);
+                        ModelingForm.ResumeLayout();
+                        //CSMEvent tag = (CSMEvent)node.Tag;
+                        //string msgToolTip = String.Format("{0:4}Monitor: {1}", String.Empty, tag.eventInfo.MonitorHandlerExtension);
+                        //if (tag.eventInfo.CGCID != default(string))
+                        //{
+                        //    msgToolTip += String.Format("{0}{1:4}CGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.CGCID);
+                        //}
+                        //if (tag.eventInfo.PGCID != default(string))
+                        //{
+                        //    msgToolTip += String.Format("{0}{1:4}PGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.PGCID);
+                        //}
+                        //if (tag.eventInfo.SGCID != default(string))
+                        //{
+                        //    msgToolTip += String.Format("{0}{1:4}SGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.SGCID);
+                        //}
+                        //msgToolTip += String.Format("{0}{1}", Environment.NewLine, tag.eventInfo.Modeling);
+                        //toolTip = new ToolTip();
+                        //toolTip.ToolTipTitle = String.Format("Event: {0}", tag.eventInfo.Type);
+                        //toolTip.UseAnimation = false;
+                        //toolTip.UseFading = false;
+                        //toolTip.Show(msgToolTip, (IWin32Window)sender, e.X, e.Y);
+                        //treeLog.SelectedNode = node;
                     }
                 }
             }
             else
             {
-                toolTip.Hide(treeLog);
-                toolTip = null;
+                ModelingForm.Close();
+                ModelingForm = null;
+                //toolTip.Hide(treeLog);
+                //toolTip = null;
             }
         }
 
@@ -574,6 +622,11 @@ namespace CSMDevHelper
             libHandler.UnregisterDll("TelCommon.dll");
             libHandler.RegisterDll("TelCommon.dll");
 
+        }
+
+        private void frmCSMDH_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            btnLogStop_Click(sender, e);
         }
     }
 }

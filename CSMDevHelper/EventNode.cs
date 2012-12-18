@@ -91,13 +91,13 @@ namespace CSMDevHelper
                     result = (this.Monitor == value);
                     break;
                 case FilterComparator.EVENT_GCID:
-                    result = this.GCID.Contains(value);
+                    result = this.CID.Contains(value);
                     break;
             }
             return result;
         }
 
-        public HashSet<String> GCID
+        public HashSet<String> CID
         {
             get
             {

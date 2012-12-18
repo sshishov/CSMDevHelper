@@ -93,7 +93,7 @@ namespace CSMDevHelper
                     {
                         if (csmevent != null)
                         {
-                            if (csmevent.eventInfo.Modeling == String.Empty)
+                            if (String.IsNullOrEmpty(csmevent.eventInfo.Modeling))
                             {
                                 csmevent.eventInfo.Modeling += result;
                             }
@@ -141,8 +141,6 @@ namespace CSMDevHelper
             {
                 case LogCode.LOG_EVENT:
                     string jsonString = (string)logResult.result;
-                    csmevent = new CSMEvent();
-                    csmevent.eventInfo.TimeStamp = logResult.timestamp;
                     Dictionary<string, object> jsonDict;
                     object outObject;
                     Match eventMatch;
@@ -151,6 +149,8 @@ namespace CSMDevHelper
                         eventMatch = Regex.Match(jsonString, LogMCDReader.msgPattern, RegexOptions.IgnorePatternWhitespace);
                         if (eventMatch.Success)
                         {
+                            csmevent = new CSMEvent();
+                            csmevent.eventInfo.TimeStamp = logResult.timestamp;
                             jsonString = eventMatch.Groups["MESSAGE"].Value;
                             // Workaround for parked events
                             if (jsonString.Contains("{*** Processing Parked Event ***}"))
@@ -208,6 +208,7 @@ namespace CSMDevHelper
                             {
                                 csmevent.eventInfo.SGCID = (string)outObject;
                             }
+                            logResult.result = csmevent;
                         }
                         else
                         {
@@ -220,7 +221,6 @@ namespace CSMDevHelper
                         csmevent.eventInfo.Cause = "Invalid JSON";
                         csmevent.node = new List<TreeNode> { new TreeNode(String.Format("Exception: {0}", ex.Message)), new TreeNode(String.Format("JSON: {0}", jsonString)) };
                     }
-                    logResult.result = csmevent;
                     break;
                 default:
                     break;
