@@ -12,20 +12,26 @@ using System.Reflection;
 namespace CSMDevHelper
 {
     delegate void LogUpdateDelegate(LogResult logResult);
+    delegate void CloseFormDelegate();
 
     internal enum ThreadState : int
     {
         RUN = 0,
         PAUSE = 1,
-        EXIT = 2,
+        STOP = 2,
     };
 
+    internal enum FormState : int
+    {
+        RUN = 0,
+        CLOSE = 1,
+    }
 
     public partial class frmCSMDH : Form
     {
-
         private EventWaitHandle waitHandle;
-        private volatile ThreadState threadState;
+        private ThreadState threadState;
+        private FormState formState;
 
         public frmCSMDH()
         {
@@ -65,6 +71,9 @@ namespace CSMDevHelper
             this.registryHandler = new RegistryHandler();
 
             this.waitHandle = new AutoResetEvent(false);
+            this.threadState = ThreadState.STOP;
+            this.formState = FormState.RUN;
+
             updateVersionLabel();
         }
 
@@ -130,8 +139,7 @@ namespace CSMDevHelper
 
         private void btnLogStop_Click(object sender, EventArgs e)
         {
-            this.threadState = ThreadState.EXIT;
-            waitHandle.Reset();
+            this.threadState = ThreadState.STOP;
             rbtnAuto.Enabled = true;
             rbtnCP.Enabled = true;
             rbtnMCD.Enabled = true;
@@ -179,7 +187,7 @@ namespace CSMDevHelper
         void ThreadLogUpdate(object logReader)
         {
             LogResult logResult;
-            while(threadState != ThreadState.EXIT)
+            while (threadState != ThreadState.STOP)
             {
                 if (threadState == ThreadState.PAUSE)
                 {
@@ -187,6 +195,10 @@ namespace CSMDevHelper
                 }
                 logResult = ((LogReader)logReader).Process();
                 Invoke(this.myDelegate, logResult);
+            }
+            if (formState == FormState.CLOSE)
+            {
+                Invoke(new CloseFormDelegate(this.Close));
             }
         }
 
@@ -230,7 +242,7 @@ namespace CSMDevHelper
                     rootNode.Text = String.Format("{0,4}> {1,-25}: {2,-20} ({3,15})", treeLog.Nodes.Count + 1, tag.eventInfo.Type, tag.eventInfo.Cause, tag.eventInfo.TimeStamp);
                     if (tag.Parked)
                     {
-                        rootNode.Text = String.Format("{0} <== Parked", this.Text);
+                        rootNode.Text = String.Format("{0} <== Parked", rootNode.Text);
                     }
                     rootNode.ForeColor = tag.GetColor();
                     listNode.Add(rootNode);
@@ -408,7 +420,9 @@ namespace CSMDevHelper
                     {
                         tag = (CSMEvent)node.Tag;
                         if (tag.Compare(compareAttribute, sender[e.NewIndex]))
-                            tag.filterCount += 1;
+                        {
+                            tag.filterSet |= (int)compareAttribute;
+                        }
                     }
 
                     for (int index = listNode.Count - 1; index >= 0; index--)
@@ -416,7 +430,7 @@ namespace CSMDevHelper
                         tag = (CSMEvent)listNode[index].Tag;
                         if (tag.Compare(compareAttribute, sender[e.NewIndex]))
                         {
-                            tag.filterCount += 1;
+                            tag.filterSet |= (int)compareAttribute;
                             listFilterNode.Add(listNode[index]);
                             listNode.RemoveAt(index);
                         }
@@ -428,8 +442,8 @@ namespace CSMDevHelper
                         tag = (CSMEvent)listFilterNode[index].Tag;
                         if (tag.Compare(compareAttribute, sender.RemovedItem))
                         {
-                            tag.filterCount -= 1;
-                            if (tag.filterCount == 0)
+                            tag.filterSet &= (int)(~compareAttribute);
+                            if (tag.filterSet == 0)
                             {
                                 listNode.Add(listFilterNode[index]);
                                 listFilterNode.RemoveAt(index);
@@ -502,6 +516,7 @@ namespace CSMDevHelper
                     TreeNode node = treeLog.GetNodeAt(e.X, e.Y);
                     if (node != null && node.Parent == null)
                     {
+                        treeLog.SelectedNode = node;
                         CSMEvent tag = (CSMEvent)node.Tag;
                         ModelingForm = new Form();
                         ModelingForm.SuspendLayout();
@@ -513,23 +528,57 @@ namespace CSMDevHelper
                         ModelingForm.FormBorderStyle = FormBorderStyle.None;
                         ModelingForm.Name = "frmModeling";
                         ModelingForm.BackColor = System.Drawing.Color.LightGray;
-                        TextBox eee = new TextBox();
+                        RichTextBox eee = new RichTextBox();
                         eee.Margin = new System.Windows.Forms.Padding(0);
+                        eee.Font = new System.Drawing.Font("Calibri", 10);
                         eee.Multiline = true;
                         eee.ReadOnly = true;
-                        TextBox eee1 = new TextBox();
-                        eee1.Text = "eeee";
-                        eee1.Dock = DockStyle.Top;
-                        //eee.Dock = DockStyle.Fill;
-                        using (Graphics g = eee.CreateGraphics())
+                        eee.Text = tag.eventInfo.Modeling;
+                        int globalindex = 0;
+                        foreach (string line in eee.Lines)
                         {
-                            eee.Size = g.MeasureString(tag.eventInfo.Modeling, eee.Font).ToSize();
-                            eee.Text = tag.eventInfo.Modeling;
+                            int index = line.IndexOf(" = ", 0);
+                            if (index > -1)
+                            {
+                                eee.SelectionStart = globalindex + index + 3;
+                                eee.SelectionLength = line.Length - index-3;
+                                eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                            }
+                            globalindex += line.Length+1;
                         }
-                        using (Graphics g = eee1.CreateGraphics())
+                        if (tag.eventInfo.SGCID != default(string))
                         {
-                            eee1.Size = g.MeasureString(eee1.Text, eee1.Font).ToSize();
+                            eee.SelectionStart = 0;
+                            eee.SelectionLength = 0;
+                            eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                            eee.SelectedText = String.Format("SGCID: {0}{1}", tag.eventInfo.SGCID, Environment.NewLine);
                         }
+                        if (tag.eventInfo.PGCID != default(string))
+                        {
+                            eee.SelectionStart = 0;
+                            eee.SelectionLength = 0;
+                            eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                            eee.SelectedText = String.Format("PGCID: {0}{1}", tag.eventInfo.PGCID, Environment.NewLine);
+                        }
+                        if (tag.eventInfo.CGCID != default(string))
+                        {
+                            eee.SelectionStart = 0;
+                            eee.SelectionLength = 0;
+                            eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                            eee.SelectedText = String.Format("CGCID: {0}{1}", tag.eventInfo.CGCID, Environment.NewLine);
+                        }
+                        //Monitor
+                        eee.SelectionStart = 0;
+                        eee.SelectionLength = 0;
+                        eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                        eee.SelectedText = String.Format("Monitor: {0}{1}", tag.Monitor, Environment.NewLine);
+                        //Event
+                        eee.SelectionStart = 0;
+                        eee.SelectionLength = 0;
+                        eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                        eee.SelectedText = String.Format("Event: {0}{1}", tag.eventInfo.Type, Environment.NewLine);
+
+                        eee.Size = eee.PreferredSize;
                         ModelingForm.Controls.AddRange(new Control[] {eee});
                         ModelingForm.AutoSize = true;
                         ModelingForm.Show(this);
@@ -543,10 +592,6 @@ namespace CSMDevHelper
                         //if (tag.eventInfo.PGCID != default(string))
                         //{
                         //    msgToolTip += String.Format("{0}{1:4}PGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.PGCID);
-                        //}
-                        //if (tag.eventInfo.SGCID != default(string))
-                        //{
-                        //    msgToolTip += String.Format("{0}{1:4}SGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.SGCID);
                         //}
                         //msgToolTip += String.Format("{0}{1}", Environment.NewLine, tag.eventInfo.Modeling);
                         //toolTip = new ToolTip();
@@ -562,8 +607,6 @@ namespace CSMDevHelper
             {
                 ModelingForm.Close();
                 ModelingForm = null;
-                //toolTip.Hide(treeLog);
-                //toolTip = null;
             }
         }
 
@@ -624,9 +667,14 @@ namespace CSMDevHelper
 
         }
 
-        private void frmCSMDH_FormClosed(object sender, FormClosedEventArgs e)
+        private void frmCSMDH_FormClosing(object sender, FormClosingEventArgs e)
         {
-            btnLogStop_Click(sender, e);
+            if (threadState != ThreadState.STOP)
+            {
+                e.Cancel = true;
+                formState = FormState.CLOSE;
+                threadState = ThreadState.STOP;
+            }
         }
     }
 }

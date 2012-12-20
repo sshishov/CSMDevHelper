@@ -648,7 +648,7 @@ namespace CSMDevHelper
             this.Name = "frmCSMDH";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.Text = "CSM Development Helper";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.frmCSMDH_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmCSMDH_FormClosing);
             this.tcCSMDH.ResumeLayout(false);
             this.tbLogPage.ResumeLayout(false);
             this.panel1.ResumeLayout(false);

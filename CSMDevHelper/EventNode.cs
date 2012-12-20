@@ -13,9 +13,9 @@ namespace CSMDevHelper
 
     internal enum FilterComparator: int
     {
-        EVENT_TYPE = 0,
-        EVENT_MONITOR = 1,
-        EVENT_GCID = 2,
+        EVENT_TYPE = 1,
+        EVENT_MONITOR = 2,
+        EVENT_GCID = 4,
     };
 
     internal class EventInfo
@@ -55,7 +55,7 @@ namespace CSMDevHelper
     public class CSMEvent
     {
         internal EventInfo eventInfo;
-        public int filterCount;
+        public int filterSet;
         public List<TreeNode> node;
 
         public bool hasModeling
@@ -140,7 +140,8 @@ namespace CSMDevHelper
         public CSMEvent()
         {
             this.eventInfo = new EventInfo();
-            this.filterCount = 0;
+            //this.filterCount = 0;
+            this.filterSet = 0;
         }
 
         public Color GetColor()
