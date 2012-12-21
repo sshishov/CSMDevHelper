@@ -657,14 +657,241 @@ namespace CSMDevHelper
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if (comboBox1.Text != String.Empty)
-            {
+            //if (comboBox1.Text != String.Empty)
+            //{
                 
+            //}
+            //LibraryHandler libHandler = new LibraryHandler();
+            //libHandler.UnregisterDll("TelCommon.dll");
+            //libHandler.RegisterDll("TelCommon.dll");
+            if (ModelingForm == null)
+            {
+                ModelingForm = new Form();
+                ModelingForm.StartPosition = FormStartPosition.Manual;
+                ModelingForm.Left = Cursor.Position.X + 5;
+                ModelingForm.Top = Cursor.Position.Y + 5;
+                //ModelingForm.Width = 0;
+                //ModelingForm.Height = 0;
+                //ModelingForm.FormBorderStyle = FormBorderStyle.None;
+                ModelingForm.FormBorderStyle = FormBorderStyle.Sizable;
+                ModelingForm.Name = "frmModeling";
+                ModelingForm.BackColor = System.Drawing.Color.LightGray;
+                RichTextBox eee = new RichTextBox();
+                eee.Margin = new System.Windows.Forms.Padding(0);
+                eee.Font = new System.Drawing.Font("Calibri", 10);
+                eee.Multiline = true;
+                eee.ReadOnly = true;
+                TabControl tbc = new TabControl();
+                //tbc.SizeMode = TabSizeMode.Fixed;
+                SplitContainer sc = new SplitContainer();
+                TableLayoutPanel tbl = new TableLayoutPanel();
+                Button b = new Button();
+                b.Text = "Hello";
+                b.Dock = DockStyle.Fill;
+                tbl.Controls.Add(b, 0, 0);
+                tbl.Controls.Add(new Button(), 0, 1);
+                tbl.Controls.Add(new Button(), 0, 2);
+                tbl.Controls.Add(new Button(), 0, 3);
+                tbl.AutoSize = true;
+                TableLayoutPanel tbl2 = new TableLayoutPanel();
+                b = new Button();
+                b.Text = "Hello";
+                tbl2.Controls.Add(b, 0, 0);
+                tbl2.Controls.Add(new Button(), 0, 1);
+                tbl2.Controls.Add(new Button(), 0, 2);
+                tbl2.Controls.Add(new Button(), 0, 3);
+                tbl2.AutoSize = true;
+                tbl2.SuspendLayout();
+                tbl.SuspendLayout();
+                sc.Panel2.Controls.Add(tbl2);
+                sc.Panel1.Controls.Add(tbl);
+                sc.Panel1.AutoSize = true;
+                sc.AutoSize = true;
+                tbl2.ResumeLayout();
+                tbl.ResumeLayout();
+                //sc.Panel1.Size = PreferredSize;
+                //sc.Panel2.Size = PreferredSize;
+                sc.BorderStyle = BorderStyle.Fixed3D;
+                sc.AutoSize = true;
+                string aaa = @"
+================================================================
+MainCallEndByExtension - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     byCallType = INTERNAL
+     sDeviceExtension = 3312
+     sDeviceDistantOptional = 
+     sDeviceExtLst = 
+     bIncludeDistConnectnsFromToDevIfInternal = True
+     bSearchConnctnsForwards = False
+     bOnlyConsiderNonAnsweredGroupCalls = False
+     ppMainCallIDsDeleted = 
+================================================================
+DevCallConnctnDelete - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sDevice = [CONF]
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     sDeviceDistantEnd = 3312
+     bUseDistantEndAlsoIfUsingCallID = True
+     bCallInInfoOverride = False
+     sCallInInfoGrp = 
+     sCallInInfoDDIDigits = 
+     bIgnoreNonCallConnections = True
+     bSearchForwards = False
+     bSearchAllCallConnections = True
+     bClearByDevFirstRung = False
+     bClearDistantEndConnectionIfFlagsMatch = False
+     iClearDistantEndConnectionIfFlagsMatch = 0
+     bDoNotAttemptOnHookCalculation = False
+================================================================
+DevCallConnctnDelete - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sDevice = 3312
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     sDeviceDistantEnd = 
+     bUseDistantEndAlsoIfUsingCallID = False
+     bCallInInfoOverride = False
+     sCallInInfoGrp = 
+     sCallInInfoDDIDigits = 
+     bIgnoreNonCallConnections = True
+     bSearchForwards = False
+     bSearchAllCallConnections = True
+     bClearByDevFirstRung = False
+     bClearDistantEndConnectionIfFlagsMatch = False
+     iClearDistantEndConnectionIfFlagsMatch = 0
+     bDoNotAttemptOnHookCalculation = False
+================================================================
+MainCallEndByExtension - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     byCallType = INTERNAL
+     sDeviceExtension = 3321
+     sDeviceDistantOptional = 
+     sDeviceExtLst = 
+     bIncludeDistConnectnsFromToDevIfInternal = True
+     bSearchConnctnsForwards = False
+     bOnlyConsiderNonAnsweredGroupCalls = False
+     ppMainCallIDsDeleted = 
+================================================================
+DevCallConnctnDelete - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sDevice = [CONF]
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     sDeviceDistantEnd = 3321
+     bUseDistantEndAlsoIfUsingCallID = True
+     bCallInInfoOverride = False
+     sCallInInfoGrp = 
+     sCallInInfoDDIDigits = 
+     bIgnoreNonCallConnections = True
+     bSearchForwards = False
+     bSearchAllCallConnections = True
+     bClearByDevFirstRung = False
+     bClearDistantEndConnectionIfFlagsMatch = False
+     iClearDistantEndConnectionIfFlagsMatch = 0
+     bDoNotAttemptOnHookCalculation = False
+================================================================
+DevCallConnctnDelete - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sDevice = 3321
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     sDeviceDistantEnd = 
+     bUseDistantEndAlsoIfUsingCallID = False
+     bCallInInfoOverride = False
+     sCallInInfoGrp = 
+     sCallInInfoDDIDigits = 
+     bIgnoreNonCallConnections = True
+     bSearchForwards = False
+     bSearchAllCallConnections = True
+     bClearByDevFirstRung = False
+     bClearDistantEndConnectionIfFlagsMatch = False
+     iClearDistantEndConnectionIfFlagsMatch = 0
+     bDoNotAttemptOnHookCalculation = False
+================================================================
+DevCallConnctnDelete - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sDevice = [CONF]
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     sDeviceDistantEnd = 
+     bUseDistantEndAlsoIfUsingCallID = False
+     bCallInInfoOverride = False
+     sCallInInfoGrp = 
+     sCallInInfoDDIDigits = 
+     bIgnoreNonCallConnections = True
+     bSearchForwards = False
+     bSearchAllCallConnections = True
+     bClearByDevFirstRung = False
+     bClearDistantEndConnectionIfFlagsMatch = False
+     iClearDistantEndConnectionIfFlagsMatch = 0
+     bDoNotAttemptOnHookCalculation = False
+================================================================
+DevCallAnswer - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sDeviceLocal = 3311, LegID = 
+     sDeviceDistant = 3321, LegID = 
+     sDeviceGroup = , LegID = 
+     bAlwaysUseDevGrpToCalcGrpDistrib = False
+     iCallModellingFlags = 15
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     bCalcMainCallIDFromConnectns = True
+     bMarkAnsweredIn = True
+     bMarkAnsweredOut = True
+     bMarkUnHeldIn = True
+     bMarkUnHeldOut = True
+     bDeleteCallConnectnsElsewhere = False
+     bUseCallAnswerFlagForCallConnectns = False
+     bDegenerateCallConference = True
+     bSegAlgrthmRun = True
+     iSegAlgrthmFlags = 257
+================================================================
+MainCallEnd - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
+     sCallIDTelSys = 9D1CE0BF47B8039EDB48
+     pSDeviceDistant = [CONF], LegID = 
+     pSDeviceLocal = 3311, LegID = 
+     sDeviceExtLst = 
+";
+                string[] bbb = System.Text.RegularExpressions.Regex.Split(aaa, String.Format("{1}+{0}{1}+", @"={2,}\s*", Environment.NewLine));//, System.Text.RegularExpressions.RegexOptions.Multiline);
+                int counter = 1;
+                foreach (string item in bbb)
+                {
+                    eee.Text += item;
+                    if (!String.IsNullOrWhiteSpace(item))
+                    {
+                        string []info = item.Split(new string[]{" - "}, StringSplitOptions.RemoveEmptyEntries);
+                        if (info.Length == 2)
+                        {
+                            TabPage tb = new TabPage(counter.ToString());
+                            RichTextBox tbText = new RichTextBox();
+                            tbText.Text = info[0] + Environment.NewLine;
+                            tbText.Text += "     " + info[1];
+                            tbText.Size = tbText.PreferredSize;
+                            tb.Controls.Add(tbText);
+                            tbc.TabPages.Add(tb);
+                            tb.Dock = DockStyle.Fill;
+                            counter++;
+                        }
+                    }
+                }
+                //tbc.Size = tbc.GetPreferredSize(tbc.Size);
+                tbc.Dock = DockStyle.Fill;
+                //tbc.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+                //int globalindex = 0;
+                //foreach (string line in eee.Lines)
+                //{
+                //    int index = line.IndexOf(" = ", 0);
+                //    if (index > -1)
+                //    {
+                //        eee.SelectionStart = globalindex + index + 3;
+                //        eee.SelectionLength = line.Length - index - 3;
+                //        eee.SelectionFont = new System.Drawing.Font(eee.Font, FontStyle.Bold);
+                //    }
+                //    globalindex += line.Length + 1;
+                //}
+                eee.Size = eee.PreferredSize;
+                ModelingForm.SuspendLayout();
+                sc.Size = sc.PreferredSize;
+                sc.SuspendLayout();
+                //ModelingForm.Controls.AddRange(new Control[] { eee, tbc });
+                //ModelingForm.Controls.AddRange(new Control[] { tbc });
+                ModelingForm.Controls.AddRange(new Control[] { sc });
+                ModelingForm.Show(this);
+                sc.ResumeLayout();
+                ModelingForm.ResumeLayout();
             }
-            LibraryHandler libHandler = new LibraryHandler();
-            libHandler.UnregisterDll("TelCommon.dll");
-            libHandler.RegisterDll("TelCommon.dll");
-
+            else
+            {
+                ModelingForm.Close();
+                ModelingForm = null;
+            }
         }
 
         private void frmCSMDH_FormClosing(object sender, FormClosingEventArgs e)
