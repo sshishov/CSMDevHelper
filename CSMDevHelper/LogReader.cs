@@ -38,7 +38,7 @@ namespace CSMDevHelper
         protected FileStream m_fileStream;
         protected StreamReader m_streamReader;
         protected static string logHeaderPattern = @"
-            (?<DATE>\d{1,2}/\d{1,2}/\d{1,4})\s+
+            (?<DATE>\d{1,2}(/|\.)\d{1,2}(/|\.)\d{1,4})\s+
             (?<TIME>\d{1,2}:\d{1,2}:\d{1,2}\s(PM|AM|))\s*
             (?<UNK1>\w+)\s+
             (?<UNK2>\w+)\s+:\s*
@@ -50,7 +50,7 @@ namespace CSMDevHelper
 
         protected LogReader(string filename, bool fromBeginning)
         {
-            this.m_fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+            this.m_fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite|FileShare.Delete|FileShare.Inheritable);
             this.m_streamReader = new StreamReader(m_fileStream);
             this.m_isModeling = false;
             if (fromBeginning)
@@ -302,6 +302,7 @@ namespace CSMDevHelper
                             case "CC":
                                 csmevent.eventInfo.Type = "Call Cleared";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.eventInfo.Cause = groups[1];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transferred CID", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Transfer destination", groups[3])));
@@ -311,6 +312,8 @@ namespace CSMDevHelper
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Subject EXT", groups[0])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "PGCID", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "SGCID", groups[2])));
+                                csmevent.eventInfo.PGCID = groups[1];
+                                csmevent.eventInfo.SGCID = groups[2];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Conference controller EXT", groups[3])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Number of parties", groups[4])));
                                 for(int i = 5, j = 1; i < groups.Count -1; i += 2, j++)
@@ -323,6 +326,7 @@ namespace CSMDevHelper
                             case "XC":
                                 csmevent.eventInfo.Type = "Connection Cleared";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Cleared EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Terminating EXT", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[3])));
@@ -331,6 +335,7 @@ namespace CSMDevHelper
                             case "DE":
                                 csmevent.eventInfo.Type = "Delivered";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Alerting internal EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Alerting outside number", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Alerting device type", groups[3])));
@@ -350,6 +355,7 @@ namespace CSMDevHelper
                             case "DI":
                                 csmevent.eventInfo.Type = "Diverted";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Diverted from EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "New destination EXT", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Diverted to outside EXT", groups[3])));
@@ -359,6 +365,7 @@ namespace CSMDevHelper
                             case "ER":
                                 csmevent.eventInfo.Type = "Established Routing";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering internal EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering outside number", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering device type", groups[3])));
@@ -375,6 +382,7 @@ namespace CSMDevHelper
                             case "ES":
                                 csmevent.eventInfo.Type = "Established";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering internal EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering outside number", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Answering device type", groups[3])));
@@ -390,6 +398,7 @@ namespace CSMDevHelper
                             case "FA":
                                 csmevent.eventInfo.Type = "Failed";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Failed EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Called number", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[3])));
@@ -398,6 +407,7 @@ namespace CSMDevHelper
                             case "HE":
                                 csmevent.eventInfo.Type = "Held";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Activate hold EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[2])));
                                 csmevent.eventInfo.Cause = groups[3];
@@ -405,6 +415,7 @@ namespace CSMDevHelper
                             case "NT":
                                 csmevent.eventInfo.Type = "Network Reached";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Trunk used", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Dialed number", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[3])));
@@ -413,6 +424,7 @@ namespace CSMDevHelper
                             case "OR":
                                 csmevent.eventInfo.Type = "Originated";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller number", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Calling device type", groups[3])));
@@ -424,6 +436,7 @@ namespace CSMDevHelper
                             case "QU":
                                 csmevent.eventInfo.Type = "Queued";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Queued EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Internal calling EXT", groups[2])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Outside caller name", groups[3])));
@@ -441,6 +454,7 @@ namespace CSMDevHelper
                             case "RE":
                                 csmevent.eventInfo.Type = "Retrieved";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Retrieving EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[2])));
                                 csmevent.eventInfo.Cause = groups[3];
@@ -452,6 +466,7 @@ namespace CSMDevHelper
                             case "SI":
                                 csmevent.eventInfo.Type = "Service Initiated";
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "CGCID", groups[0])));
+                                csmevent.eventInfo.CGCID = groups[0];
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Initiating EXT", groups[1])));
                                 csmevent.node.Add(new TreeNode(String.Format("{0}: {1}", "Local CNX state", groups[2])));
                                 csmevent.eventInfo.Cause = groups[3];

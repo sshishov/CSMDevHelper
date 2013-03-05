@@ -74,7 +74,12 @@ namespace CSMDevHelper
         {
             get
             {
-                return Convert.ToString(this.regKey.OpenSubKey(@"Client").GetValue(@"Version"));
+                RegistryKey _key = this.regKey.OpenSubKey(@"Client");
+                if (_key != null)
+                {
+                    return Convert.ToString(_key.GetValue(@"Version"));
+                }
+                return "";
             }
         }
 
@@ -90,7 +95,12 @@ namespace CSMDevHelper
         {
             get
             {
-                return Convert.ToString(this.regKey.OpenSubKey(@"RealViewer").GetValue(@"Version"));
+                RegistryKey _key = this.regKey.OpenSubKey(@"RealViewer");
+                if (_key != null)
+                {
+                    return Convert.ToString(_key.GetValue(@"Version"));
+                }
+                return "";
             }
         }
 
@@ -98,7 +108,12 @@ namespace CSMDevHelper
         {
             get
             {
-                return Convert.ToString(this.regKey.OpenSubKey(@"Reporter").GetValue(@"Version"));
+                RegistryKey _key = this.regKey.OpenSubKey(@"Reporter");
+                if (_key != null)
+                {
+                    return Convert.ToString(_key.GetValue(@"Version"));
+                }
+                return "";
             }
         }
 
@@ -114,7 +129,12 @@ namespace CSMDevHelper
         {
             get
             {
-                return Convert.ToString(this.regKey.OpenSubKey(@"RT").GetValue(@"Version"));
+                RegistryKey _key = this.regKey.OpenSubKey(@"RT");
+                if (_key != null)
+                {
+                    return Convert.ToString(_key.GetValue(@"Version"));
+                }
+                return "";
             }
         }
 
