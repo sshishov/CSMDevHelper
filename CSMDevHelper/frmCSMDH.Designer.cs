@@ -167,6 +167,7 @@ namespace CSMDevHelper
             this.rbtnCP.TabIndex = 12;
             this.rbtnCP.Text = "CP5000";
             this.rbtnCP.UseVisualStyleBackColor = true;
+            this.rbtnCP.Visible = false;
             // 
             // rbtnMCD
             // 
@@ -177,6 +178,7 @@ namespace CSMDevHelper
             this.rbtnMCD.TabIndex = 11;
             this.rbtnMCD.Text = "MCD3300";
             this.rbtnMCD.UseVisualStyleBackColor = true;
+            this.rbtnMCD.Visible = false;
             // 
             // chkTailing
             // 
@@ -687,6 +689,7 @@ namespace CSMDevHelper
         private RegistryHandler registryHandler;
 
         private string log_filename;
+        private const string default_log_filename = @"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log";
         private TreeNode rootNode;
         private Dictionary<string, HashSet<string>> dictGCID;
         private CustomBindingList<string> listMonitor;
@@ -697,7 +700,6 @@ namespace CSMDevHelper
         private CustomBindingList<string> listFilterEvent;
         private CustomBindingList<TreeNode> listNode;
         private CustomBindingList<TreeNode> listFilterNode;
-        private ToolTip toolTip;
         private Form ModelingForm;
         private Panel panel1;
         private Button btnLogStop;

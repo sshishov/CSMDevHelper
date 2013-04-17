@@ -37,7 +37,6 @@ namespace CSMDevHelper
         {
             InitializeComponent();
             this.rootNode = null;
-            this.toolTip = null;
             this.treeLog.Sorted = true;
             this.dictGCID = new Dictionary<string, HashSet<string>>();
 
@@ -68,6 +67,7 @@ namespace CSMDevHelper
             this.listFilterNode.ListChanged += new ListChangedEventHandler(listFilterNode_ListChanged);
 
             this.log_filename = @"C:\ProgramData\Mitel\Customer Service Manager\Server\Logs\TelDrv.log";
+
             this.registryHandler = new RegistryHandler();
 
             this.waitHandle = new AutoResetEvent(false);
@@ -105,18 +105,23 @@ namespace CSMDevHelper
 
             try
             {
-                if (rbtnMCD.Checked)
-                {
-                    logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
-                }
-                else if (rbtnCP.Checked)
+                if ((rbtnAuto.Checked &&
+                    registryHandler.DriverVersion == enumDriverVersion.CP5000) ||
+                    rbtnCP.Checked)
                 {
                     logReader = new LogCPReader(log_filename, !chkTailing.Checked);
+                }
+                else if ((rbtnAuto.Checked &&
+                    (registryHandler.DriverVersion == enumDriverVersion.MCD4x ||
+                    registryHandler.DriverVersion == enumDriverVersion.MCD5x)) ||
+                    rbtnMCD.Checked)
+                {
+                    logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
                 }
                 else
                 {
                     //TODO Fill this section
-                    logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
+                    throw new Exception("The driver version should be checked!");
                 }
             }
             catch (Exception ex)
@@ -511,7 +516,7 @@ namespace CSMDevHelper
         {
             if (ModelingForm ==null)
             {
-                if (e.Button == MouseButtons.Right)
+                if (e.Button == MouseButtons.Middle)
                 {
                     TreeNode node = treeLog.GetNodeAt(e.X, e.Y);
                     if (node != null && node.Parent == null)
@@ -583,23 +588,20 @@ namespace CSMDevHelper
                         ModelingForm.AutoSize = true;
                         ModelingForm.Show(this);
                         ModelingForm.ResumeLayout();
-                        //CSMEvent tag = (CSMEvent)node.Tag;
-                        //string msgToolTip = String.Format("{0:4}Monitor: {1}", String.Empty, tag.eventInfo.MonitorHandlerExtension);
-                        //if (tag.eventInfo.CGCID != default(string))
-                        //{
-                        //    msgToolTip += String.Format("{0}{1:4}CGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.CGCID);
-                        //}
-                        //if (tag.eventInfo.PGCID != default(string))
-                        //{
-                        //    msgToolTip += String.Format("{0}{1:4}PGCID: {2}", Environment.NewLine, String.Empty, tag.eventInfo.PGCID);
-                        //}
-                        //msgToolTip += String.Format("{0}{1}", Environment.NewLine, tag.eventInfo.Modeling);
-                        //toolTip = new ToolTip();
-                        //toolTip.ToolTipTitle = String.Format("Event: {0}", tag.eventInfo.Type);
-                        //toolTip.UseAnimation = false;
-                        //toolTip.UseFading = false;
-                        //toolTip.Show(msgToolTip, (IWin32Window)sender, e.X, e.Y);
-                        //treeLog.SelectedNode = node;
+                    }
+                }
+                else if (e.Button == MouseButtons.Right)
+                {
+                    TreeNode node = treeLog.GetNodeAt(e.X, e.Y);
+                    if (node != null && node.Parent == null)
+                    {
+                        treeLog.SelectedNode = node;
+                        string result = (node.Text + Environment.NewLine).TrimStart();
+                        foreach (TreeNode inode in node.Nodes)
+                        {
+                            result += "    " + inode.Text + Environment.NewLine;
+                        }
+                        Clipboard.SetText(result);
                     }
                 }
             }
@@ -612,10 +614,10 @@ namespace CSMDevHelper
 
         private void treeLog_KeyDown(object sender, KeyEventArgs e)
         {
-            if (toolTip != null)
+            if (ModelingForm != null)
             {
-                toolTip.Hide(treeLog);
-                toolTip = null;
+                ModelingForm.Close();
+                ModelingForm = null;
             }
         }
 
@@ -631,6 +633,18 @@ namespace CSMDevHelper
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 log_filename = dialog.FileName;
+                if (log_filename.Equals(default_log_filename,StringComparison.CurrentCultureIgnoreCase))
+                {
+                    rbtnAuto.Visible = true;
+                    rbtnMCD.Visible = false;
+                    rbtnCP.Visible = false;
+                }
+                else
+                {
+                    rbtnAuto.Visible = false;
+                    rbtnMCD.Visible = true;
+                    rbtnCP.Visible = true;
+                }
                 this.btnLogStop_Click(sender, e);
             }
         }
@@ -657,22 +671,12 @@ namespace CSMDevHelper
 
         private void button1_Click(object sender, EventArgs e)
         {
-            //if (comboBox1.Text != String.Empty)
-            //{
-                
-            //}
-            //LibraryHandler libHandler = new LibraryHandler();
-            //libHandler.UnregisterDll("TelCommon.dll");
-            //libHandler.RegisterDll("TelCommon.dll");
             if (ModelingForm == null)
             {
                 ModelingForm = new Form();
                 ModelingForm.StartPosition = FormStartPosition.Manual;
                 ModelingForm.Left = Cursor.Position.X + 5;
                 ModelingForm.Top = Cursor.Position.Y + 5;
-                //ModelingForm.Width = 0;
-                //ModelingForm.Height = 0;
-                //ModelingForm.FormBorderStyle = FormBorderStyle.None;
                 ModelingForm.FormBorderStyle = FormBorderStyle.Sizable;
                 ModelingForm.Name = "frmModeling";
                 ModelingForm.BackColor = System.Drawing.Color.LightGray;
@@ -682,7 +686,6 @@ namespace CSMDevHelper
                 eee.Multiline = true;
                 eee.ReadOnly = true;
                 TabControl tbc = new TabControl();
-                //tbc.SizeMode = TabSizeMode.Fixed;
                 SplitContainer sc = new SplitContainer();
                 TableLayoutPanel tbl = new TableLayoutPanel();
                 Button b = new Button();
@@ -709,8 +712,6 @@ namespace CSMDevHelper
                 sc.AutoSize = true;
                 tbl2.ResumeLayout();
                 tbl.ResumeLayout();
-                //sc.Panel1.Size = PreferredSize;
-                //sc.Panel2.Size = PreferredSize;
                 sc.BorderStyle = BorderStyle.Fixed3D;
                 sc.AutoSize = true;
                 string aaa = @"

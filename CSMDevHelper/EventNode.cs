@@ -63,6 +63,14 @@ namespace CSMDevHelper
             get{ return this.eventInfo.Modeling != default(String); }
         }
 
+        public string Text
+        {
+            get
+            {
+                return "HELL";
+            }
+        }
+
         public string Monitor
         {
             get
