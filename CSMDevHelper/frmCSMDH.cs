@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 using System.Reflection;
+using System.IO;
 
 namespace CSMDevHelper
 {
@@ -32,6 +33,8 @@ namespace CSMDevHelper
         private EventWaitHandle waitHandle;
         private ThreadState threadState;
         private FormState formState;
+        private LogReader m_logReader;
+        private FileSystemWatcher m_watcher;
 
         public frmCSMDH()
         {
@@ -80,7 +83,6 @@ namespace CSMDevHelper
         private void btnLogStart_Click(object sender, EventArgs e)
         {
             this.threadState = ThreadState.RUN;
-            LogReader logReader;
             listNode.Clear();
             listFilterNode.Clear();
             tbEvent.Clear();
@@ -103,20 +105,27 @@ namespace CSMDevHelper
             btnLogStop.Enabled = true;
             btnLogPause.Enabled = true;
 
+            m_watcher = new FileSystemWatcher();
+            m_watcher.Path = Path.GetDirectoryName(log_filename);
+            m_watcher.Filter = Path.GetFileName(log_filename);
+            m_watcher.NotifyFilter = NotifyFilters.LastWrite;
+            m_watcher.Changed += new FileSystemEventHandler(watcher_OnChanged);
+            m_watcher.EnableRaisingEvents = true;
+
             try
             {
                 if ((rbtnAuto.Checked &&
                     registryHandler.DriverVersion == enumDriverVersion.CP5000) ||
                     rbtnCP.Checked)
                 {
-                    logReader = new LogCPReader(log_filename, !chkTailing.Checked);
+                    m_logReader = new LogCPReader(log_filename, !chkTailing.Checked);
                 }
                 else if ((rbtnAuto.Checked &&
                     (registryHandler.DriverVersion == enumDriverVersion.MCD4x ||
                     registryHandler.DriverVersion == enumDriverVersion.MCD5x)) ||
                     rbtnMCD.Checked)
                 {
-                    logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
+                    m_logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
                 }
                 else
                 {
@@ -137,9 +146,14 @@ namespace CSMDevHelper
             logThread.Name = "LogReaderThread";
             logThread.Priority = ThreadPriority.Lowest;
             logThread.IsBackground = true;
-            logThread.Start(logReader);
+            logThread.Start(m_logReader);
             while (!logThread.IsAlive);
             blockControls(sender, e);
+        }
+
+        private void watcher_OnChanged(object sender, FileSystemEventArgs e)
+        {
+            Console.WriteLine("The file {0} has been changed, changed", e.Name);
         }
 
         private void btnLogStop_Click(object sender, EventArgs e)
@@ -153,6 +167,10 @@ namespace CSMDevHelper
             btnLogPause.Enabled = false;
             btnLogPause.Text = "Pause";
             unblockControls(sender, e);
+            if (m_logReader != null)
+            {
+                m_logReader.Close();
+            }
         }
 
         private void btnLogPause_Click(object sender, EventArgs e)
@@ -633,7 +651,7 @@ namespace CSMDevHelper
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 log_filename = dialog.FileName;
-                if (log_filename.Equals(default_log_filename,StringComparison.CurrentCultureIgnoreCase))
+                if (log_filename.Equals(default_log_filename, StringComparison.CurrentCultureIgnoreCase))
                 {
                     rbtnAuto.Visible = true;
                     rbtnMCD.Visible = false;

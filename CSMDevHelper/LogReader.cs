@@ -47,23 +47,32 @@ namespace CSMDevHelper
         protected static string logModelingPattern = @"^=+";
         protected bool m_isModeling;
         protected CSMEvent csmevent;
+        static int readPosition = 0;
 
         protected LogReader(string filename, bool fromBeginning)
         {
-            this.m_fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite|FileShare.Delete|FileShare.Inheritable);
-            this.m_streamReader = new StreamReader(m_fileStream);
-            this.m_isModeling = false;
+            m_fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite| FileShare.Delete);
+            m_streamReader = new StreamReader(m_fileStream);
+            m_isModeling = false;
             if (fromBeginning)
             {
-                this.m_fileStream.Seek(0, SeekOrigin.Begin);
+                //this.m_fileStream.Seek(0, SeekOrigin.Begin);
+                m_streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
             }
             else
             {
-                this.m_fileStream.Seek(0, SeekOrigin.End);
+                //this.m_fileStream.Seek(0, SeekOrigin.End);
+                m_streamReader.BaseStream.Seek(0, SeekOrigin.End);
             }
         }
 
-        ~LogReader() { }
+        public void Close()
+        {
+            m_streamReader.Close();
+            //m_fileStream.Close();
+        }
+
+        ~LogReader() {}
 
 
         public virtual LogResult Process()
