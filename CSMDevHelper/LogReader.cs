@@ -16,6 +16,7 @@ namespace CSMDevHelper
         LOG_EVENT = 1,
         LOG_LEG = 2,
         LOG_MODELING = 3,
+        LOG_EOF = 4,
     };
 
     public class LogResult
@@ -45,35 +46,51 @@ namespace CSMDevHelper
             (?<MESSAGE>.*)";
 
         protected static string logModelingPattern = @"^=+";
-        protected bool m_isModeling;
         protected CSMEvent csmevent;
-        static int readPosition = 0;
+        public static bool s_isModeling = false;
+        public static long s_readPosition = -1;
 
         protected LogReader(string filename, bool fromBeginning)
         {
             m_fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite| FileShare.Delete);
             m_streamReader = new StreamReader(m_fileStream);
-            m_isModeling = false;
-            if (fromBeginning)
+            s_isModeling = false;
+            if (s_readPosition == -1)
             {
-                //this.m_fileStream.Seek(0, SeekOrigin.Begin);
-                m_streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
+                if (fromBeginning)
+                {
+                    m_fileStream.Seek(0, SeekOrigin.Begin);
+                    s_readPosition = m_fileStream.Position;
+                }
+                else
+                {
+                    m_fileStream.Seek(0, SeekOrigin.End);
+                    s_readPosition = m_fileStream.Position;
+                }
             }
             else
             {
-                //this.m_fileStream.Seek(0, SeekOrigin.End);
-                m_streamReader.BaseStream.Seek(0, SeekOrigin.End);
+                m_fileStream.Seek(s_readPosition, SeekOrigin.Begin);
             }
+
+        }
+
+        public static void reset()
+        {
+            s_readPosition = -1;
+            s_isModeling = false;
         }
 
         public void Close()
         {
+            long pos = LogReader.s_readPosition;
+            LogReader.s_readPosition = m_fileStream.Position;
+            Console.WriteLine("Setting position from {0} to {1}", pos, LogReader.s_readPosition);
             m_streamReader.Close();
-            //m_fileStream.Close();
+            m_fileStream.Close();
         }
 
         ~LogReader() {}
-
 
         public virtual LogResult Process()
         {
@@ -96,9 +113,9 @@ namespace CSMDevHelper
                 {
                     if (Regex.Match(result, LogReader.logModelingPattern, RegexOptions.IgnorePatternWhitespace).Success)
                     {
-                        this.m_isModeling = !this.m_isModeling;
+                        LogReader.s_isModeling = !LogReader.s_isModeling;
                     }
-                    if (this.m_isModeling)
+                    if (LogReader.s_isModeling)
                     {
                         if (csmevent != null)
                         {
@@ -118,6 +135,10 @@ namespace CSMDevHelper
                         }
                     }
                 }
+            }
+            else if (result == null)
+            {
+                code = LogCode.LOG_EOF;
             }
             return new LogResult(code, result, timestamp);
         }
@@ -271,6 +292,8 @@ namespace CSMDevHelper
             }
             return currentNodes;
         }
+
+        ~LogMCDReader() {}
     }
 
 
@@ -523,5 +546,7 @@ namespace CSMDevHelper
             }
             return logResult;
         }
+
+        ~LogCPReader() {}
     }
 }

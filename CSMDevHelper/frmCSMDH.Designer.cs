@@ -10,7 +10,6 @@ namespace CSMDevHelper
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-        private LogUpdateDelegate myDelegate;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -36,6 +35,7 @@ namespace CSMDevHelper
             this.tcCSMDH = new System.Windows.Forms.TabControl();
             this.tbLogPage = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnLogPause = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
             this.rbtnAuto = new System.Windows.Forms.RadioButton();
             this.rbtnCP = new System.Windows.Forms.RadioButton();
@@ -73,7 +73,6 @@ namespace CSMDevHelper
             this.lbFilterGCID = new System.Windows.Forms.ListBox();
             this.tbGCID = new System.Windows.Forms.TextBox();
             this.btnLogStart = new System.Windows.Forms.Button();
-            this.btnLogPause = new System.Windows.Forms.Button();
             this.treeLog = new System.Windows.Forms.TreeView();
             this.tbGeneralPage = new System.Windows.Forms.TabPage();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
@@ -122,19 +121,31 @@ namespace CSMDevHelper
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btnLogPause);
             this.panel1.Controls.Add(this.panel2);
             this.panel1.Controls.Add(this.chkTailing);
             this.panel1.Controls.Add(this.btnLogStop);
             this.panel1.Controls.Add(this.ssEvents);
             this.panel1.Controls.Add(this.tcLogFilters);
             this.panel1.Controls.Add(this.btnLogStart);
-            this.panel1.Controls.Add(this.btnLogPause);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel1.Location = new System.Drawing.Point(656, 10);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(10);
             this.panel1.Size = new System.Drawing.Size(538, 564);
             this.panel1.TabIndex = 9;
+            // 
+            // btnLogPause
+            // 
+            this.btnLogPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnLogPause.Enabled = false;
+            this.btnLogPause.Location = new System.Drawing.Point(404, 13);
+            this.btnLogPause.Name = "btnLogPause";
+            this.btnLogPause.Size = new System.Drawing.Size(60, 22);
+            this.btnLogPause.TabIndex = 11;
+            this.btnLogPause.Text = "Pause";
+            this.btnLogPause.UseVisualStyleBackColor = true;
+            this.btnLogPause.Click += new System.EventHandler(this.btnLogPause_Click);
             // 
             // panel2
             // 
@@ -196,9 +207,9 @@ namespace CSMDevHelper
             // 
             this.btnLogStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnLogStop.Enabled = false;
-            this.btnLogStop.Location = new System.Drawing.Point(465, 13);
+            this.btnLogStop.Location = new System.Drawing.Point(470, 13);
             this.btnLogStop.Name = "btnLogStop";
-            this.btnLogStop.Size = new System.Drawing.Size(60, 22);
+            this.btnLogStop.Size = new System.Drawing.Size(55, 22);
             this.btnLogStop.TabIndex = 3;
             this.btnLogStop.Text = "Stop";
             this.btnLogStop.UseVisualStyleBackColor = true;
@@ -525,18 +536,6 @@ namespace CSMDevHelper
             this.btnLogStart.UseVisualStyleBackColor = true;
             this.btnLogStart.Click += new System.EventHandler(this.btnLogStart_Click);
             // 
-            // btnLogPause
-            // 
-            this.btnLogPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnLogPause.Enabled = false;
-            this.btnLogPause.Location = new System.Drawing.Point(399, 13);
-            this.btnLogPause.Name = "btnLogPause";
-            this.btnLogPause.Size = new System.Drawing.Size(60, 22);
-            this.btnLogPause.TabIndex = 6;
-            this.btnLogPause.Text = "Pause";
-            this.btnLogPause.UseVisualStyleBackColor = true;
-            this.btnLogPause.Click += new System.EventHandler(this.btnLogPause_Click);
-            // 
             // treeLog
             // 
             this.treeLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -650,7 +649,6 @@ namespace CSMDevHelper
             this.Name = "frmCSMDH";
             this.Padding = new System.Windows.Forms.Padding(10);
             this.Text = "CSM Development Helper";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmCSMDH_FormClosing);
             this.tcCSMDH.ResumeLayout(false);
             this.tbLogPage.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
@@ -683,7 +681,6 @@ namespace CSMDevHelper
         private System.Windows.Forms.TabPage tbLogPage;
         private System.Windows.Forms.TreeView treeLog;
 
-        private System.Threading.Thread logThread;
         private System.Windows.Forms.StatusStrip ssEvents;
         private System.Windows.Forms.ToolStripStatusLabel tsslEvents;
         private RegistryHandler registryHandler;
@@ -732,7 +729,6 @@ namespace CSMDevHelper
         private ListBox lbGCID;
         private ListBox lbFilterGCID;
         private TextBox tbGCID;
-        private Button btnLogPause;
         private MenuStrip menuStrip1;
         private ToolStripMenuItem fIleToolStripMenuItem;
         private ToolStripMenuItem openLogFileToolStripMenuItem;
@@ -745,6 +741,7 @@ namespace CSMDevHelper
         private Label label1;
         private GroupBox groupBox1;
         private ComboBox comboBox1;
+        private Button btnLogPause;
     }
 }
 

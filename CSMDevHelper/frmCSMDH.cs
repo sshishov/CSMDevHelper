@@ -6,35 +6,15 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Threading;
 using System.Reflection;
 using System.IO;
 
 namespace CSMDevHelper
 {
-    delegate void LogUpdateDelegate(LogResult logResult);
-    delegate void CloseFormDelegate();
-
-    internal enum ThreadState : int
-    {
-        RUN = 0,
-        PAUSE = 1,
-        STOP = 2,
-    };
-
-    internal enum FormState : int
-    {
-        RUN = 0,
-        CLOSE = 1,
-    }
 
     public partial class frmCSMDH : Form
     {
-        private EventWaitHandle waitHandle;
-        private ThreadState threadState;
-        private FormState formState;
-        private LogReader m_logReader;
-        private FileSystemWatcher m_watcher;
+        private LogFileWatcher m_watcher;
 
         public frmCSMDH()
         {
@@ -73,16 +53,11 @@ namespace CSMDevHelper
 
             this.registryHandler = new RegistryHandler();
 
-            this.waitHandle = new AutoResetEvent(false);
-            this.threadState = ThreadState.STOP;
-            this.formState = FormState.RUN;
-
             updateVersionLabel();
         }
 
         private void btnLogStart_Click(object sender, EventArgs e)
         {
-            this.threadState = ThreadState.RUN;
             listNode.Clear();
             listFilterNode.Clear();
             tbEvent.Clear();
@@ -105,35 +80,33 @@ namespace CSMDevHelper
             btnLogStop.Enabled = true;
             btnLogPause.Enabled = true;
 
-            m_watcher = new FileSystemWatcher();
-            m_watcher.Path = Path.GetDirectoryName(log_filename);
-            m_watcher.Filter = Path.GetFileName(log_filename);
-            m_watcher.NotifyFilter = NotifyFilters.LastWrite;
-            m_watcher.Changed += new FileSystemEventHandler(watcher_OnChanged);
-            m_watcher.EnableRaisingEvents = true;
+            enumDriverVersion driverVersion;
 
-            try
-            {
-                if ((rbtnAuto.Checked &&
+            if ((rbtnAuto.Checked &&
                     registryHandler.DriverVersion == enumDriverVersion.CP5000) ||
                     rbtnCP.Checked)
-                {
-                    m_logReader = new LogCPReader(log_filename, !chkTailing.Checked);
-                }
-                else if ((rbtnAuto.Checked &&
-                    (registryHandler.DriverVersion == enumDriverVersion.MCD4x ||
-                    registryHandler.DriverVersion == enumDriverVersion.MCD5x)) ||
-                    rbtnMCD.Checked)
-                {
-                    m_logReader = new LogMCDReader(log_filename, !chkTailing.Checked);
-                }
-                else
-                {
-                    //TODO Fill this section
-                    throw new Exception("The driver version should be checked!");
-                }
+            {
+                driverVersion = enumDriverVersion.CP5000;
             }
-            catch (Exception ex)
+            else if ((rbtnAuto.Checked &&
+                (registryHandler.DriverVersion == enumDriverVersion.MCD4x ||
+                registryHandler.DriverVersion == enumDriverVersion.MCD5x)) ||
+                rbtnMCD.Checked)
+            {
+                driverVersion = enumDriverVersion.MCD5x;
+            }
+            else
+            {
+                //TODO Fill this section
+                throw new Exception("The driver version should be checked!");
+            }
+
+            m_watcher = new LogFileWatcher(log_filename, driverVersion, !chkTailing.Checked, this);
+            try
+            {
+                m_watcher.run();
+            }
+            catch (System.Exception ex)
             {
                 MessageBox.Show(ex.Message);
                 openLogFile(sender, e);
@@ -141,24 +114,11 @@ namespace CSMDevHelper
                 return;
             }
 
-            logThread = new Thread(new ParameterizedThreadStart(this.ThreadLogUpdate));
-            this.myDelegate = new LogUpdateDelegate(this.LogUpdate);
-            logThread.Name = "LogReaderThread";
-            logThread.Priority = ThreadPriority.Lowest;
-            logThread.IsBackground = true;
-            logThread.Start(m_logReader);
-            while (!logThread.IsAlive);
             blockControls(sender, e);
-        }
-
-        private void watcher_OnChanged(object sender, FileSystemEventArgs e)
-        {
-            Console.WriteLine("The file {0} has been changed, changed", e.Name);
         }
 
         private void btnLogStop_Click(object sender, EventArgs e)
         {
-            this.threadState = ThreadState.STOP;
             rbtnAuto.Enabled = true;
             rbtnCP.Enabled = true;
             rbtnMCD.Enabled = true;
@@ -167,31 +127,26 @@ namespace CSMDevHelper
             btnLogPause.Enabled = false;
             btnLogPause.Text = "Pause";
             unblockControls(sender, e);
-            if (m_logReader != null)
-            {
-                m_logReader.Close();
-            }
+            m_watcher.stop();
         }
 
         private void btnLogPause_Click(object sender, EventArgs e)
         {
             if (btnLogPause.Text == "Pause")
             {
-                waitHandle.Reset();
-                threadState = ThreadState.PAUSE;
+                m_watcher.pause();
                 btnLogPause.Text = "Resume";
                 unblockControls(sender, e);
             }
             else
             {
-                waitHandle.Set();
-                threadState = ThreadState.RUN;
+                m_watcher.resume();
                 btnLogPause.Text = "Pause";
                 blockControls(sender, e);
             }
         }
 
-        void blockControls(object sender, EventArgs e)
+        private void blockControls(object sender, EventArgs e)
         {
             treeLog.Enabled = false;
             tbMonitorPage.Enabled = false;
@@ -199,7 +154,7 @@ namespace CSMDevHelper
             tbGCIDPage.Enabled = false;
         }
 
-        void unblockControls(object sender, EventArgs e)
+        private void unblockControls(object sender, EventArgs e)
         {
             treeLog.Enabled = true;
             tbMonitorPage.Enabled = true;
@@ -207,25 +162,19 @@ namespace CSMDevHelper
             tbGCIDPage.Enabled = true;
         }
 
-        void ThreadLogUpdate(object logReader)
+        public void LogUpdateHandler(LogResult logResult)
         {
-            LogResult logResult;
-            while (threadState != ThreadState.STOP)
+            if (IsHandleCreated)
             {
-                if (threadState == ThreadState.PAUSE)
-                {
-                    waitHandle.WaitOne();
-                }
-                logResult = ((LogReader)logReader).Process();
-                Invoke(this.myDelegate, logResult);
+                Invoke(new EventHandler(delegate { LogUpdate(logResult); }));
             }
-            if (formState == FormState.CLOSE)
+            else
             {
-                Invoke(new CloseFormDelegate(this.Close));
+                LogUpdate(logResult);
             }
         }
 
-        void LogUpdate(LogResult logResult)
+        private void LogUpdate(LogResult logResult)
         {
             CSMEvent tag;
             switch (logResult.code)
@@ -910,16 +859,6 @@ MainCallEnd - sCallIDTelSys = 9D1CE0BF47B8039EDB48 :
             {
                 ModelingForm.Close();
                 ModelingForm = null;
-            }
-        }
-
-        private void frmCSMDH_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (threadState != ThreadState.STOP)
-            {
-                e.Cancel = true;
-                formState = FormState.CLOSE;
-                threadState = ThreadState.STOP;
             }
         }
     }

@@ -39,6 +39,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -70,6 +71,9 @@
     <Compile Include="CustomBindingList.cs" />
     <Compile Include="EventNode.cs" />
     <Compile Include="LibraryHandler.cs" />
+    <Compile Include="LogFileWatcher.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="LogReader.cs" />
     <Compile Include="frmCSMDH.cs">
       <SubType>Form</SubType>
