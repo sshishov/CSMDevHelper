@@ -8,8 +8,6 @@ using System.Windows.Forms;
 
 namespace CSMDevHelper
 {
-    delegate void LogUpdateDelegate(LogResult logResult);
-
     class LogFileWatcher: Control
     {
         Thread m_tWorker;
@@ -83,12 +81,13 @@ namespace CSMDevHelper
                     {
                         logReader = new LogMCDReader(m_sFileName, m_bTail);
                     }
+
                     Thread logThread = new Thread(new ParameterizedThreadStart(ThreadLogUpdate));
                     logThread.Name = "LogReaderThread";
                     logThread.Priority = ThreadPriority.Lowest;
                     logThread.IsBackground = true;
                     logThread.Start(logReader);
-                    while (!logThread.IsAlive) ;
+                    while (!logThread.IsAlive);
                     logThread.Join();
                 }
                 Thread.Sleep(100);
