@@ -87,7 +87,6 @@ namespace CSMDevHelper
                     logThread.Priority = ThreadPriority.Lowest;
                     logThread.IsBackground = true;
                     logThread.Start(logReader);
-                    while (!logThread.IsAlive);
                     logThread.Join();
                 }
                 Thread.Sleep(100);

@@ -85,7 +85,6 @@ namespace CSMDevHelper
         {
             long pos = LogReader.s_readPosition;
             LogReader.s_readPosition = m_fileStream.Position;
-            Console.WriteLine("Setting position from {0} to {1}", pos, LogReader.s_readPosition);
             m_streamReader.Close();
             m_fileStream.Close();
         }

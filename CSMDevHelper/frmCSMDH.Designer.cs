@@ -359,17 +359,17 @@ namespace CSMDevHelper
             // 
             // tbFilterMonitor
             // 
-            this.tbFilterMonitor.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterMonitor.Location = new System.Drawing.Point(281, 13);
             this.tbFilterMonitor.Name = "tbFilterMonitor";
-            this.tbFilterMonitor.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterMonitor.Size = new System.Drawing.Size(210, 20);
             this.tbFilterMonitor.TabIndex = 22;
             this.tbFilterMonitor.TextChanged += new System.EventHandler(this.tbFilterMonitor_TextChanged);
             // 
             // btnDelAllMonitor
             // 
-            this.btnDelAllMonitor.Location = new System.Drawing.Point(211, 255);
+            this.btnDelAllMonitor.Location = new System.Drawing.Point(229, 308);
             this.btnDelAllMonitor.Name = "btnDelAllMonitor";
-            this.btnDelAllMonitor.Size = new System.Drawing.Size(32, 32);
+            this.btnDelAllMonitor.Size = new System.Drawing.Size(46, 60);
             this.btnDelAllMonitor.TabIndex = 21;
             this.btnDelAllMonitor.Text = "<<";
             this.btnDelAllMonitor.UseVisualStyleBackColor = true;
@@ -377,9 +377,9 @@ namespace CSMDevHelper
             // 
             // btnDelMonitor
             // 
-            this.btnDelMonitor.Location = new System.Drawing.Point(211, 217);
+            this.btnDelMonitor.Location = new System.Drawing.Point(229, 242);
             this.btnDelMonitor.Name = "btnDelMonitor";
-            this.btnDelMonitor.Size = new System.Drawing.Size(32, 32);
+            this.btnDelMonitor.Size = new System.Drawing.Size(46, 60);
             this.btnDelMonitor.TabIndex = 20;
             this.btnDelMonitor.Text = "<";
             this.btnDelMonitor.UseVisualStyleBackColor = true;
@@ -387,9 +387,9 @@ namespace CSMDevHelper
             // 
             // btnAddAllMonitor
             // 
-            this.btnAddAllMonitor.Location = new System.Drawing.Point(211, 134);
+            this.btnAddAllMonitor.Location = new System.Drawing.Point(229, 176);
             this.btnAddAllMonitor.Name = "btnAddAllMonitor";
-            this.btnAddAllMonitor.Size = new System.Drawing.Size(32, 32);
+            this.btnAddAllMonitor.Size = new System.Drawing.Size(46, 60);
             this.btnAddAllMonitor.TabIndex = 19;
             this.btnAddAllMonitor.Text = ">>";
             this.btnAddAllMonitor.UseVisualStyleBackColor = true;
@@ -397,9 +397,9 @@ namespace CSMDevHelper
             // 
             // btnAddMonitor
             // 
-            this.btnAddMonitor.Location = new System.Drawing.Point(211, 96);
+            this.btnAddMonitor.Location = new System.Drawing.Point(229, 110);
             this.btnAddMonitor.Name = "btnAddMonitor";
-            this.btnAddMonitor.Size = new System.Drawing.Size(32, 32);
+            this.btnAddMonitor.Size = new System.Drawing.Size(46, 60);
             this.btnAddMonitor.TabIndex = 18;
             this.btnAddMonitor.Text = ">";
             this.btnAddMonitor.UseVisualStyleBackColor = true;
@@ -407,29 +407,33 @@ namespace CSMDevHelper
             // 
             // lbMonitor
             // 
+            this.lbMonitor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.lbMonitor.FormattingEnabled = true;
-            this.lbMonitor.Location = new System.Drawing.Point(2, 35);
+            this.lbMonitor.Location = new System.Drawing.Point(13, 39);
             this.lbMonitor.Name = "lbMonitor";
             this.lbMonitor.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbMonitor.Size = new System.Drawing.Size(203, 342);
+            this.lbMonitor.Size = new System.Drawing.Size(210, 381);
             this.lbMonitor.Sorted = true;
             this.lbMonitor.TabIndex = 17;
             // 
             // lbFilterMonitor
             // 
+            this.lbFilterMonitor.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbFilterMonitor.FormattingEnabled = true;
-            this.lbFilterMonitor.Location = new System.Drawing.Point(249, 35);
+            this.lbFilterMonitor.Location = new System.Drawing.Point(281, 39);
             this.lbFilterMonitor.Name = "lbFilterMonitor";
             this.lbFilterMonitor.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbFilterMonitor.Size = new System.Drawing.Size(203, 342);
+            this.lbFilterMonitor.Size = new System.Drawing.Size(210, 381);
             this.lbFilterMonitor.Sorted = true;
             this.lbFilterMonitor.TabIndex = 16;
             // 
             // tbMonitor
             // 
-            this.tbMonitor.Location = new System.Drawing.Point(2, 9);
+            this.tbMonitor.Location = new System.Drawing.Point(13, 13);
             this.tbMonitor.Name = "tbMonitor";
-            this.tbMonitor.Size = new System.Drawing.Size(203, 20);
+            this.tbMonitor.Size = new System.Drawing.Size(210, 20);
             this.tbMonitor.TabIndex = 15;
             this.tbMonitor.TextChanged += new System.EventHandler(this.tbMonitor_TextChanged);
             // 
@@ -452,17 +456,17 @@ namespace CSMDevHelper
             // 
             // tbFilterGCID
             // 
-            this.tbFilterGCID.Location = new System.Drawing.Point(249, 9);
+            this.tbFilterGCID.Location = new System.Drawing.Point(281, 13);
             this.tbFilterGCID.Name = "tbFilterGCID";
-            this.tbFilterGCID.Size = new System.Drawing.Size(203, 20);
+            this.tbFilterGCID.Size = new System.Drawing.Size(210, 20);
             this.tbFilterGCID.TabIndex = 29;
             this.tbFilterGCID.TextChanged += new System.EventHandler(this.tbFilterGCID_TextChanged);
             // 
             // btnDelAllGCID
             // 
-            this.btnDelAllGCID.Location = new System.Drawing.Point(211, 255);
+            this.btnDelAllGCID.Location = new System.Drawing.Point(229, 308);
             this.btnDelAllGCID.Name = "btnDelAllGCID";
-            this.btnDelAllGCID.Size = new System.Drawing.Size(32, 32);
+            this.btnDelAllGCID.Size = new System.Drawing.Size(46, 60);
             this.btnDelAllGCID.TabIndex = 28;
             this.btnDelAllGCID.Text = "<<";
             this.btnDelAllGCID.UseVisualStyleBackColor = true;
@@ -470,9 +474,9 @@ namespace CSMDevHelper
             // 
             // btnDelGCID
             // 
-            this.btnDelGCID.Location = new System.Drawing.Point(211, 217);
+            this.btnDelGCID.Location = new System.Drawing.Point(229, 242);
             this.btnDelGCID.Name = "btnDelGCID";
-            this.btnDelGCID.Size = new System.Drawing.Size(32, 32);
+            this.btnDelGCID.Size = new System.Drawing.Size(46, 60);
             this.btnDelGCID.TabIndex = 27;
             this.btnDelGCID.Text = "<";
             this.btnDelGCID.UseVisualStyleBackColor = true;
@@ -480,9 +484,9 @@ namespace CSMDevHelper
             // 
             // btnAddAllGCID
             // 
-            this.btnAddAllGCID.Location = new System.Drawing.Point(211, 134);
+            this.btnAddAllGCID.Location = new System.Drawing.Point(229, 176);
             this.btnAddAllGCID.Name = "btnAddAllGCID";
-            this.btnAddAllGCID.Size = new System.Drawing.Size(32, 32);
+            this.btnAddAllGCID.Size = new System.Drawing.Size(46, 60);
             this.btnAddAllGCID.TabIndex = 26;
             this.btnAddAllGCID.Text = ">>";
             this.btnAddAllGCID.UseVisualStyleBackColor = true;
@@ -490,9 +494,9 @@ namespace CSMDevHelper
             // 
             // btnAddGCID
             // 
-            this.btnAddGCID.Location = new System.Drawing.Point(211, 96);
+            this.btnAddGCID.Location = new System.Drawing.Point(229, 110);
             this.btnAddGCID.Name = "btnAddGCID";
-            this.btnAddGCID.Size = new System.Drawing.Size(32, 32);
+            this.btnAddGCID.Size = new System.Drawing.Size(46, 60);
             this.btnAddGCID.TabIndex = 25;
             this.btnAddGCID.Text = ">";
             this.btnAddGCID.UseVisualStyleBackColor = true;
@@ -500,28 +504,32 @@ namespace CSMDevHelper
             // 
             // lbGCID
             // 
+            this.lbGCID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.lbGCID.FormattingEnabled = true;
-            this.lbGCID.Location = new System.Drawing.Point(2, 35);
+            this.lbGCID.Location = new System.Drawing.Point(13, 39);
             this.lbGCID.Name = "lbGCID";
             this.lbGCID.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbGCID.Size = new System.Drawing.Size(203, 342);
+            this.lbGCID.Size = new System.Drawing.Size(210, 381);
             this.lbGCID.TabIndex = 24;
             // 
             // lbFilterGCID
             // 
+            this.lbFilterGCID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbFilterGCID.FormattingEnabled = true;
-            this.lbFilterGCID.Location = new System.Drawing.Point(249, 35);
+            this.lbFilterGCID.Location = new System.Drawing.Point(281, 39);
             this.lbFilterGCID.Name = "lbFilterGCID";
             this.lbFilterGCID.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbFilterGCID.Size = new System.Drawing.Size(203, 342);
+            this.lbFilterGCID.Size = new System.Drawing.Size(210, 381);
             this.lbFilterGCID.Sorted = true;
             this.lbFilterGCID.TabIndex = 23;
             // 
             // tbGCID
             // 
-            this.tbGCID.Location = new System.Drawing.Point(2, 9);
+            this.tbGCID.Location = new System.Drawing.Point(13, 13);
             this.tbGCID.Name = "tbGCID";
-            this.tbGCID.Size = new System.Drawing.Size(203, 20);
+            this.tbGCID.Size = new System.Drawing.Size(210, 20);
             this.tbGCID.TabIndex = 22;
             this.tbGCID.TextChanged += new System.EventHandler(this.tbGCID_TextChanged);
             // 
